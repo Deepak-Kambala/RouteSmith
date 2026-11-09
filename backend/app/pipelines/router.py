@@ -14,3 +14,4 @@ def route_rag_pipeline(strategy: str, query: str, max_tokens: int = 2048) -> Dic
     else:
         # Fallback to clustered hybrid
         return execute_clustered_hybrid_rag(query, max_tokens)
+

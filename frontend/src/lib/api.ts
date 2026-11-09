@@ -217,3 +217,4 @@ function getFallbackBayesianStats(): BayesianReport {
     curve_points: curvePoints
   };
 }
+

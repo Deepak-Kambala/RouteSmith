@@ -2,6 +2,7 @@ import time
 import ast
 from typing import Dict, Any
 from app.docs.flagsmith_docs import FLAGS_DOCS
+from app.gemini_service import call_gemini_api
 
 def execute_agentic_cot(query: str, max_tokens: int = 2048) -> Dict[str, Any]:
     """
@@ -11,10 +12,6 @@ def execute_agentic_cot(query: str, max_tokens: int = 2048) -> Dict[str, Any]:
     """
     start_time = time.time()
     
-    # Step 1: Generator synthesis
-    time.sleep(0.18)
-    
-    # Step 2: Critic AST validation
     code_candidate = """import asyncio
 from flagsmith import Flagsmith
 
@@ -36,7 +33,6 @@ async def resolve_edge_case(identifier: str, attempts: int = 3):
                 raise exc
             await asyncio.sleep(0.5)"""
 
-    # Validate AST
     try:
         ast.parse(code_candidate)
         ast_verified = True

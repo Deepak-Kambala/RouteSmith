@@ -94,3 +94,4 @@ def run_synthetic_swarm(user_count: int = 1500) -> Dict[str, Any]:
         "summary": results,
         "recent_events": recent_events
     }
+

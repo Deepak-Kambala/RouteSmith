@@ -133,3 +133,4 @@ def get_recent_telemetry():
         "exposures": flagsmith_service.exposure_events[-10:],
         "conversions": flagsmith_service.conversion_events[-10:]
     }
+

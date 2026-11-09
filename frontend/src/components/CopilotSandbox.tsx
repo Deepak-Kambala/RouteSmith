@@ -285,3 +285,4 @@ export const CopilotSandbox: React.FC<CopilotSandboxProps> = ({ currentIdentity,
     </div>
   );
 };
+

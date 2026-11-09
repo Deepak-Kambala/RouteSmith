@@ -1,6 +1,7 @@
 import time
 from typing import Dict, Any
 from app.docs.flagsmith_docs import FLAGS_DOCS
+from app.gemini_service import call_gemini_api
 
 def execute_fast_zero_shot(query: str, max_tokens: int = 2048) -> Dict[str, Any]:
     """
@@ -14,8 +15,8 @@ def execute_fast_zero_shot(query: str, max_tokens: int = 2048) -> Dict[str, Any]
     retrieved = FLAGS_DOCS[:3]
     context_text = "\n".join([f"[{d['title']}]: {d['content']}" for d in retrieved])
     
-    # Simulate processing time targeting ~540ms
-    time.sleep(0.08)
+    # Optional Gemini enhancement
+    gemini_output = call_gemini_api(f"Answer briefly using this context:\n{context_text}\nQuestion: {query}")
     
     code_snippet = """from flagsmith import Flagsmith
 
@@ -29,7 +30,7 @@ flags = flagsmith.get_identity_flags(
 is_feature_active = flags.is_feature_enabled("beta_feature")
 print(f"Feature status: {is_feature_active}")"""
 
-    explanation = (
+    explanation = gemini_output or (
         "Here is the standard single-pass implementation using the Flagsmith Python SDK. "
         "The client evaluates flags synchronously with basic trait mapping."
     )

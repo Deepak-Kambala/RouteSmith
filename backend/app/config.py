@@ -5,6 +5,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 class Settings(BaseModel):
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
     FLAGSMITH_ENVIRONMENT_KEY: str = os.getenv("FLAGSMITH_ENVIRONMENT_KEY", "ser.mock_routesmith_key")
     FLAGSMITH_CLIENT_KEY: str = os.getenv("FLAGSMITH_CLIENT_KEY", "mock_client_key")
     FLAGSMITH_ADMIN_API_KEY: str = os.getenv("FLAGSMITH_ADMIN_API_KEY", "")

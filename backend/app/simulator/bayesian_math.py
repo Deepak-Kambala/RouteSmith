@@ -112,3 +112,4 @@ def compute_bayesian_posteriors(variants_data: Dict[str, Dict[str, Any]], sample
         "relative_lift_pct": round(relative_lift, 1),
         "curve_points": curve_points
     }
+

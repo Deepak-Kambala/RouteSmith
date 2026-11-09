@@ -50,3 +50,4 @@ class FlagsmithAdminClient:
         }
 
 admin_client = FlagsmithAdminClient()
+

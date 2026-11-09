@@ -222,3 +222,4 @@ export const SwarmSimulator: React.FC<SwarmSimulatorProps> = ({ onSwarmCompleted
     </div>
   );
 };
+

@@ -1,6 +1,7 @@
 import time
 from typing import Dict, Any
 from app.docs.flagsmith_docs import FLAGS_DOCS
+from app.gemini_service import call_gemini_api
 
 def execute_clustered_hybrid_rag(query: str, max_tokens: int = 2048) -> Dict[str, Any]:
     """
@@ -10,9 +11,10 @@ def execute_clustered_hybrid_rag(query: str, max_tokens: int = 2048) -> Dict[str
     """
     start_time = time.time()
     
-    # Simulate semantic clustering & BM25 reranking
-    time.sleep(0.12)
     selected_docs = [FLAGS_DOCS[0], FLAGS_DOCS[1], FLAGS_DOCS[2], FLAGS_DOCS[3]]
+    context_text = "\n".join([f"[{d['title']}]: {d['content']}" for d in selected_docs])
+    
+    gemini_output = call_gemini_api(f"Provide accurate architecture advice with code for:\n{context_text}\nQuery: {query}")
     
     code_snippet = """from flagsmith import Flagsmith
 from fastapi import FastAPI, Depends, Request
@@ -43,7 +45,7 @@ async def get_user_features(user_id: str, tier: str = "enterprise"):
         "semantic_cache": cache_enabled
     }"""
 
-    explanation = (
+    explanation = gemini_output or (
         "Clustered Hybrid RAG retrieved and reranked contextual segments across SDK Setup, "
         "Multivariate Routing, and Event Analytics. The code snippet showcases production-grade singleton initialization, "
         "async dependency injection, and deterministic multivariate flag extraction."
