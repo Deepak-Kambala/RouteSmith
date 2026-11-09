@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+:root {
+  --canvas-bg: #FAF8F5;
+  --surface-bg: #F3EFEA;
+  --card-bg: #FFFFFF;
+  --card-border: #E7E2D9;
+  --card-border-hover: #D5CEC4;
+  --ink-primary: #181715;
+  --ink-secondary: #6B665E;
+  --ink-muted: #8E887E;
+  --accent-blue: #2563EB;
+  --accent-yellow: #FEF08A;
+  --accent-orange: #E04F34;
+  --accent-green: #10B981;
+  --accent-amber: #D97706;
+
+  --font-serif: "Newsreader", Charter, "Bitstream Charter", "Sitka Text", Cambria, Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+}
+
+body {
+  background-color: var(--canvas-bg);
+  color: var(--ink-primary);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-serif-display {
+  font-family: var(--font-serif);
+}
+
+.font-mono-code {
+  font-family: var(--font-mono);
+}
+
+/* Organic Highlighter Brush Accent (Reference UI Style) */
+.highlighter-brush {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.highlighter-brush::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 4px;
+  height: 48%;
+  background-color: #FEF08A;
+  z-index: -1;
+  transform: rotate(-1deg);
+  border-radius: 4px;
+}
+
+.highlighter-coral {
+  position: relative;
+  display: inline-block;
+}
+
+.highlighter-coral::before {
+  content: "";
+  position: absolute;
+  left: -2px;
+  right: -2px;
+  bottom: 2px;
+  height: 35%;
+  background-color: #FED7AA;
+  z-index: -1;
+  border-radius: 2px;
+}
+
+/* Tactile Keycap Badge */
+.keycap-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: #44403C;
+  background-color: #F5F3EF;
+  border: 1px solid #D6D3CD;
+  border-bottom: 2px solid #C4C0B8;
+  border-radius: 5px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.04);
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D5CEC4;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8B0A2;
+}
