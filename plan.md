@@ -1,4 +1,4 @@
-# 📋 RouteSmith AI — UI & Development Master Plan
+# RouteSmith AI - UI & Development Master Plan
 
 > **Design Philosophy & Visual Mandate:**  
 > **Strictly NO generic AI slop, NO neon purple/navy cyber-themes, and NO cookie-cutter SaaS layouts.**  
@@ -6,7 +6,7 @@
 
 ---
 
-## 🎨 1. Design System & Aesthetic Architecture
+## 1. Design System & Aesthetic Architecture
 
 ### 1.1 Color Palette & Canvas (Warm Editorial Craft)
 * **Canvas Backgrounds:**
@@ -15,7 +15,7 @@
   * Card Background: `#FFFFFF` (Pure white with warm crisp border `#E7E2D9`)
   * Elevated Hover: `#FCFAF7`
 * **Typography & Ink:**
-  * Primary Ink: `#181715` (Deep warm charcoal ink, never harsh `#000`)
+  * Primary Ink: `#181715` (Deep warm charcoal ink, never harsh pure black)
   * Secondary Ink: `#6B665E` (Warm slate gray for labels, metadata, captions)
   * Muted / Border Ink: `#D5CEC4` (Hairline dividers, tactile containers)
 * **Handcrafted Accent Highlights (Reference UI Style):**
@@ -39,7 +39,7 @@
 
 ---
 
-## 🏗️ 2. Core Modules & Screen Breakdown
+## 2. Core Modules & Screen Breakdown
 
 ### Screen 1: The Dual-Panel Copilot & Experimenter HUD (`/`)
 * **Header & Identity HUD:**
@@ -82,7 +82,7 @@
 ### Screen 3: Bayesian Analytics & 1-Click Rollout Deck (`/analytics` or embedded tab)
 * **3 Variant Metric Cards:**
   * **Variant A (`fast_zero_shot`):** 500 exposures, 56 conversions ($11.2\%$), $540\text{ ms}$ avg latency.
-  * **Variant B (`clustered_hybrid_rag`):** 500 exposures, 124 conversions ($24.8\%$), $1080\text{ ms}$ avg latency — **Winner Badge**.
+  * **Variant B (`clustered_hybrid_rag`):** 500 exposures, 124 conversions ($24.8\%$), $1080\text{ ms}$ avg latency - **Winner Badge**.
   * **Variant C (`agentic_self_reflection`):** 500 exposures, 83 conversions ($16.5\%$), $2810\text{ ms}$ avg latency.
 * **Bayesian Posterior Distribution Chart:**
   * Interactive SVG curves showing the 3 Beta distributions $\text{Beta}(\alpha + y, \beta + n - y)$ overlapping.
@@ -94,54 +94,55 @@
 
 ---
 
-## ⚙️ 3. Full-Stack Technical Architecture
+## 3. Full-Stack Technical Architecture
 
 ### 3.1 Backend Architecture (FastAPI & Flagsmith SDK)
 ```
 backend/
-├── app/
-│   ├── main.py                     # API entrypoint, CORS, exception handlers
-│   ├── config.py                   # Flagsmith & provider keys
-│   ├── flagsmith_service.py        # Server-side Flagsmith SDK client & identity evaluation
-│   ├── admin_api.py                # Flagsmith Admin API wrapper (PUT /multivariate-feature-states)
-│   ├── pipelines/
-│   │   ├── router.py               # Dynamic pipeline selector based on active flag
-│   │   ├── fast_zero_shot.py       # Top-3 vector search, low-latency prompt
-│   │   ├── clustered_hybrid_rag.py # Semantic cluster + BM25 keyword rerank
-│   │   └── agentic_self_reflection.py # Generator-critic AST syntax validator
-│   ├── simulator/
-│   │   ├── personas.py             # Persona heuristics (latency dropoff, accuracy threshold)
-│   │   ├── swarm_worker.py         # Concurrent synthetic identity generator
-│   │   └── bayesian_math.py        # Closed-form Beta PDF & Monte Carlo Win Probability
-│   └── docs/                       # Technical documentation corpus (Flagsmith docs, async API)
-└── requirements.txt
+|-- app/
+|   |-- main.py                     # API entrypoint, CORS, exception handlers
+|   |-- config.py                   # Flagsmith & provider keys
+|   |-- flagsmith_service.py        # Server-side Flagsmith SDK client & identity evaluation
+|   |-- admin_api.py                # Flagsmith Admin API wrapper (PUT /multivariate-feature-states)
+|   |-- pipelines/
+|   |   |-- router.py               # Dynamic pipeline selector based on active flag
+|   |   |-- fast_zero_shot.py       # Top-3 vector search, low-latency prompt
+|   |   |-- clustered_hybrid_rag.py # Semantic cluster + BM25 keyword rerank
+|   |   \-- agentic_self_reflection.py # Generator-critic AST syntax validator
+|   |-- simulator/
+|   |   |-- personas.py             # Persona heuristics (latency dropoff, accuracy threshold)
+|   |   |-- swarm_worker.py         # Concurrent synthetic identity generator
+|   |   \-- bayesian_math.py        # Closed-form Beta PDF & Monte Carlo Win Probability
+|   \-- docs/                       # Technical documentation corpus (Flagsmith docs, async API)
+\-- requirements.txt
 ```
 
 ### 3.2 Frontend Architecture (Next.js 15 App Router & Tailwind)
 ```
 frontend/
-├── src/
-│   ├── app/
-│   │   ├── layout.tsx              # Google Fonts (Instrument Serif, Geist, JetBrains Mono)
-│   │   ├── page.tsx                # Unified Copilot & Experimenter workspace
-│   │   └── globals.css             # Custom utility classes, highlighter brush, tactile borders
-│   ├── components/
-│   │   ├── ui/                     # Tactile buttons, sliders, dialogs, badges
-│   │   ├── header/                 # Brand, identity switcher, session HUD
-│   │   ├── round-flow/             # 4-Round Interactive Architecture Diagram
-│   │   ├── copilot/                # Chat query box, answer stream, code sandbox, action buttons
-│   │   ├── simulator/              # Swarm controls, progress bar, dot visualizer
-│   │   ├── analytics/              # Beta distribution curves, variant cards, promote button
-│   │   └── telemetry/              # Live sliding toast stream
-│   └── lib/
-│       ├── api.ts                  # Backend REST client
-│       └── flagsmith.ts            # Client-side Flagsmith SDK initialization
-└── package.json
+|-- src/
+|   |-- app/
+|   |   |-- layout.tsx              # Google Fonts (Instrument Serif, Geist, JetBrains Mono)
+|   |   |-- page.tsx                # Unified Copilot & Experimenter workspace
+|   |   \-- globals.css             # Custom utility classes, highlighter brush, tactile borders
+|   |-- components/
+|   |   |-- ui/                     # Tactile buttons, sliders, dialogs, badges
+|   |   |-- header/                 # Brand, identity switcher, session HUD
+|   |   |-- round-flow/             # 4-Round Interactive Architecture Diagram
+|   |   |-- copilot/                # Chat query box, answer stream, code sandbox, action buttons
+|   |   |-- simulator/              # Swarm controls, progress bar, dot visualizer
+|   |   |-- analytics/              # Beta distribution curves, variant cards, promote button
+|   |   \-- telemetry/              # Live sliding toast stream
+|   \-- lib/
+|       |-- api.ts                  # Backend REST client
+|       \-- flagsmith.ts            # Client-side Flagsmith SDK initialization
+|-- package.json
+\-- tailwind.config.ts
 ```
 
 ---
 
-## 🗓️ 4. Phased Implementation Roadmap
+## 4. Phased Implementation Roadmap
 
 ### Phase 1: Foundation & Design System Setup
 - [ ] Initialize Next.js 15 project with Tailwind CSS and custom fonts (Instrument Serif + Geist Sans + JetBrains Mono).
@@ -157,7 +158,7 @@ frontend/
 - [ ] Connect secondary flags: `enable_semantic_cache` and `max_context_tokens`.
 
 ### Phase 3: Developer Copilot UI & Metric Tracking
-- [ ] Build glassmorphic/tactile Header with Live Identity Badge & 1-Click Identity Switcher.
+- [ ] Build header with Live Identity Badge & 1-Click Identity Switcher.
 - [ ] Build Copilot query box with pre-configured developer documentation queries.
 - [ ] Build Code Sandbox with "Copy Working Code" and "Run Snippet" triggers.
 - [ ] Wire the `answer_resolved` conversion metric to Flagsmith SDK with the 30-second error suppression guardrail.
@@ -172,7 +173,7 @@ frontend/
 - [ ] Enable interactive node inspection showing live SDK request/response JSON payloads.
 
 ### Phase 5: Swarm Traffic Simulator & Bayesian Engine
-- [ ] Implement `swarm_worker.py` to concurrently simulate 100–2,000 developer identities.
+- [ ] Implement `swarm_worker.py` to concurrently simulate 100-2,000 developer identities.
 - [ ] Implement persona behavioral modeling (latency vs. accuracy conversion heuristics).
 - [ ] Implement `bayesian_math.py` with Beta distribution computation and Monte Carlo sampling (100k iterations).
 - [ ] Render interactive Beta distribution curve charts with confidence intervals.
@@ -183,10 +184,9 @@ frontend/
 
 ---
 
-## 🎯 5. Verification & Acceptance Criteria
+## 5. Verification & Acceptance Criteria
 1. **Design Authenticity:** No purple neon or generic AI templates; looks like an editorial, human-crafted developer tool (like LocalFlow).
 2. **Deterministic Hashing:** Switching identities deterministically changes assigned variants according to 33/33/34 split.
 3. **Real Metric Tracking:** Clicking "Copy Code" sends real `answer_resolved` events to Flagsmith.
 4. **Swarm Convergence:** Simulating 1,500 users produces the exact statistically significant results ($11.2\%$ vs $24.8\%$ vs $16.5\%$) converging on $97.4\%$ win probability.
 5. **Zero-Downtime Rollout:** Clicking promote immediately locks production traffic to Variant B via the Flagsmith Admin API.
-
