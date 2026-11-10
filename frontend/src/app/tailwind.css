@@ -20,8 +20,6 @@
     --text-base--line-height: calc(1.5 / 1);
     --text-lg: 1.125rem;
     --text-lg--line-height: calc(1.75 / 1.125);
-    --text-xl: 1.25rem;
-    --text-xl--line-height: calc(1.75 / 1.25);
     --font-weight-semibold: 600;
     --font-weight-bold: 700;
     --tracking-tight: -0.025em;
@@ -235,6 +233,12 @@
   .ml-2 {
     margin-left: calc(var(--spacing) * 2);
   }
+  .line-clamp-2 {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
   .flex {
     display: flex;
   }
@@ -264,6 +268,9 @@
   }
   .h-full {
     height: 100%;
+  }
+  .max-h-48 {
+    max-height: calc(var(--spacing) * 48);
   }
   .min-h-\[260px\] {
     min-height: 260px;
@@ -346,6 +353,11 @@
   .gap-4 {
     gap: calc(var(--spacing) * 4);
   }
+  :where(.space-y-0\.5 > :not(:last-child)) {
+    --tw-space-y-reverse: 0;
+    margin-block-start: calc(calc(var(--spacing) * 0.5) * var(--tw-space-y-reverse));
+    margin-block-end: calc(calc(var(--spacing) * 0.5) * calc(1 - var(--tw-space-y-reverse)));
+  }
   :where(.space-y-1 > :not(:last-child)) {
     --tw-space-y-reverse: 0;
     margin-block-start: calc(var(--spacing) * var(--tw-space-y-reverse));
@@ -379,8 +391,16 @@
   .self-end {
     align-self: flex-end;
   }
+  .truncate {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
   .overflow-x-auto {
     overflow-x: auto;
+  }
+  .overflow-y-auto {
+    overflow-y: auto;
   }
   .border {
     border-style: var(--tw-border-style);
@@ -488,6 +508,9 @@
   .p-6 {
     padding: calc(var(--spacing) * 6);
   }
+  .px-1\.5 {
+    padding-inline: calc(var(--spacing) * 1.5);
+  }
   .px-2 {
     padding-inline: calc(var(--spacing) * 2);
   }
@@ -512,8 +535,8 @@
   .py-2\.5 {
     padding-block: calc(var(--spacing) * 2.5);
   }
-  .py-4 {
-    padding-block: calc(var(--spacing) * 4);
+  .py-3\.5 {
+    padding-block: calc(var(--spacing) * 3.5);
   }
   .pt-1 {
     padding-top: var(--spacing);
@@ -703,6 +726,9 @@
     .hover\:bg-\[\#FFFFFF\]:hover {
       background-color: #FFFFFF;
     }
+    .hover\:bg-white:hover {
+      background-color: var(--color-white);
+    }
     .hover\:text-\[\#151413\]:hover {
       color: #151413;
     }
@@ -721,6 +747,12 @@
     opacity: 50%;
   }
   @media (width >= 40rem) {
+    .sm\:col-span-2 {
+      grid-column: span 2 / span 2;
+    }
+    .sm\:grid-cols-3 {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
     .sm\:flex-row {
       flex-direction: row;
     }
@@ -732,6 +764,9 @@
     }
   }
   @media (width >= 48rem) {
+    .md\:grid-cols-2 {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
     .md\:grid-cols-3 {
       grid-template-columns: repeat(3, minmax(0, 1fr));
     }

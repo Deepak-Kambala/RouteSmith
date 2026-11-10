@@ -10,6 +10,7 @@ from app.pipelines.router import route_rag_pipeline
 from app.simulator.swarm_worker import run_synthetic_swarm
 from app.simulator.bayesian_math import compute_bayesian_posteriors
 from app.admin_api import admin_client
+from app.docs.doc_manager import doc_manager
 
 app = FastAPI(
     title="RouteSmith AI Backend",
@@ -43,13 +44,19 @@ class SwarmRequest(BaseModel):
 class PromoteRequest(BaseModel):
     winner_variant: Optional[str] = "clustered_hybrid_rag"
 
+class AddDocRequest(BaseModel):
+    title: str
+    content: str
+    category: Optional[str] = "Custom Data"
+
 @app.get("/api/health")
 def health_check():
     return {
         "status": "healthy",
         "service": "RouteSmith AI",
         "flagsmith_mode": "cloud_sdk" if flagsmith_service.use_live else "deterministic_engine",
-        "traffic_weights": flagsmith_service.traffic_weights
+        "traffic_weights": flagsmith_service.traffic_weights,
+        "docs_count": len(doc_manager.get_all())
     }
 
 @app.get("/api/flags")
@@ -76,7 +83,6 @@ def ask_docs_copilot(req: ChatRequest):
     strategy = eval_result["strategy"]
     max_tokens = eval_result.get("max_context_tokens", 2048)
     
-    # Dynamic pipeline execution
     pipeline_result = route_rag_pipeline(
         strategy=strategy,
         query=req.query,
@@ -92,6 +98,7 @@ def ask_docs_copilot(req: ChatRequest):
         "language": pipeline_result.get("language", "python"),
         "latency_ms": pipeline_result.get("latency_ms"),
         "cost_usd": pipeline_result.get("cost_usd"),
+        "active_docs_count": pipeline_result.get("active_docs_count"),
         "flagsmith_eval": eval_result,
         "warning": pipeline_result.get("warning")
     }
@@ -126,6 +133,23 @@ def promote_winning_variant(req: PromoteRequest):
     res = admin_client.promote_winner(req.winner_variant or "clustered_hybrid_rag")
     return res
 
+@app.get("/api/docs")
+def get_docs():
+    """Returns all active documentation chunks."""
+    return {"docs": doc_manager.get_all()}
+
+@app.post("/api/docs")
+def add_custom_doc(req: AddDocRequest):
+    """Adds a custom document to the RAG knowledge base."""
+    new_doc = doc_manager.add_doc(title=req.title, content=req.content, category=req.category or "Custom Data")
+    return {"status": "added", "doc": new_doc, "total_docs": len(doc_manager.get_all())}
+
+@app.post("/api/docs/reset")
+def reset_docs():
+    """Resets documentation back to default Flagsmith corpus."""
+    docs = doc_manager.reset_to_defaults()
+    return {"status": "reset", "total_docs": len(docs)}
+
 @app.get("/api/telemetry/recent")
 def get_recent_telemetry():
     """Returns the latest exposures and conversion events for the toast notification stream."""
@@ -133,4 +157,3 @@ def get_recent_telemetry():
         "exposures": flagsmith_service.exposure_events[-10:],
         "conversions": flagsmith_service.conversion_events[-10:]
     }
-

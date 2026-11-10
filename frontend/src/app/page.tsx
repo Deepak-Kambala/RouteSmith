@@ -6,6 +6,7 @@ import { RoundNavigator } from "@/components/RoundNavigator";
 import { CopilotSandbox } from "@/components/CopilotSandbox";
 import { SwarmSimulator } from "@/components/SwarmSimulator";
 import { BayesianAnalytics } from "@/components/BayesianAnalytics";
+import { CustomDocsManager } from "@/components/CustomDocsManager";
 import { ToastStream } from "@/components/ToastStream";
 import { FlagsmithEval, TelemetryEvent } from "@/lib/types";
 import { fetchFlags } from "@/lib/api";
@@ -13,7 +14,7 @@ import { fetchFlags } from "@/lib/api";
 export default function Home() {
   const [currentIdentity, setCurrentIdentity] = useState<string>("user_8841f");
   const [flagsEval, setFlagsEval] = useState<FlagsmithEval | null>(null);
-  const [activeTab, setActiveTab] = useState<"copilot" | "rounds" | "simulator" | "analytics">("copilot");
+  const [activeTab, setActiveTab] = useState<"copilot" | "docs" | "simulator" | "analytics" | "rounds">("copilot");
   const [isSwitching, setIsSwitching] = useState<boolean>(false);
   const [toasts, setToasts] = useState<TelemetryEvent[]>([]);
 
@@ -69,20 +70,18 @@ export default function Home() {
         isSwitching={isSwitching}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-4 space-y-3">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-3.5 space-y-3">
         {/* Router Status Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-[#EDEAE1] border border-[#151413] text-[10px] text-[#7A756D]">
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1 bg-[#EDEAE1] border border-[#151413] text-[10px] text-[#7A756D]">
           <div className="flex items-center gap-2">
             <span className="font-bold text-[#151413]">&gt; ROUTER: MULTIVARIATE</span>
             <span>|</span>
-            <span>CACHE: <strong className="text-[#059669]">ON</strong></span>
+            <span>SPLIT: <strong className="text-[#151413]">33/33/34</strong></span>
             <span>|</span>
-            <span>MAX_TOKENS: <strong className="text-[#151413]">2048</strong></span>
+            <span>CACHE: <strong className="text-[#059669]">ON</strong></span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span>SPLIT: <strong className="text-[#151413]">33/33/34</strong></span>
-            <span>|</span>
             <span>METRIC: <strong className="text-[#059669]">answer_resolved</strong></span>
           </div>
         </div>
@@ -92,7 +91,7 @@ export default function Home() {
           <CopilotSandbox currentIdentity={currentIdentity} onEventTracked={addToast} />
         )}
 
-        {activeTab === "rounds" && <RoundNavigator />}
+        {activeTab === "docs" && <CustomDocsManager />}
 
         {activeTab === "simulator" && (
           <SwarmSimulator
@@ -119,14 +118,16 @@ export default function Home() {
             onEventTracked={addToast}
           />
         )}
+
+        {activeTab === "rounds" && <RoundNavigator />}
       </main>
 
       <ToastStream events={toasts} onDismiss={dismissToast} />
 
-      <footer className="border-t-[1.5px] border-[#151413] py-1.5 px-4 text-center text-[9px] text-[#7A756D] bg-[#EDEAE1]">
+      <footer className="border-t-[1.5px] border-[#151413] py-1 px-4 text-center text-[9px] text-[#7A756D] bg-[#EDEAE1]">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <span>ROUTESMITH AI // FLAGSMITH TRACK 01</span>
-          <span>ONLINE</span>
+          <span>ROUTESMITH AI // RAG MULTIVARIATE GATEWAY</span>
+          <span>STATUS: ONLINE</span>
         </div>
       </footer>
     </div>

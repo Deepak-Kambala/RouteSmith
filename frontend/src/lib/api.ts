@@ -218,3 +218,38 @@ function getFallbackBayesianStats(): BayesianReport {
   };
 }
 
+export async function fetchDocs(): Promise<any> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/docs`);
+    if (!res.ok) throw new Error("Fetch docs failed");
+    return await res.json();
+  } catch (err) {
+    return { docs: [] };
+  }
+}
+
+export async function addCustomDoc(title: string, content: string, category: string = "Custom Data"): Promise<any> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/docs`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ title, content, category })
+    });
+    if (!res.ok) throw new Error("Add doc failed");
+    return await res.json();
+  } catch (err) {
+    return { status: "error" };
+  }
+}
+
+export async function resetDocs(): Promise<any> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/docs/reset`, {
+      method: "POST"
+    });
+    if (!res.ok) throw new Error("Reset docs failed");
+    return await res.json();
+  } catch (err) {
+    return { status: "error" };
+  }
+}
