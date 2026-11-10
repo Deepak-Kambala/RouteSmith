@@ -51,7 +51,7 @@ export default function Home() {
     setToasts((prev) => [event, ...prev.slice(0, 3)]);
     setTimeout(() => {
       dismissToast(event.id);
-    }, 4500);
+    }, 4000);
   };
 
   const dismissToast = (id: string) => {
@@ -60,7 +60,6 @@ export default function Home() {
 
   return (
     <div className="min-h-screen flex flex-col font-mono text-[#151413]">
-      {/* Header Deck */}
       <Header
         currentIdentity={currentIdentity}
         flagsEval={flagsEval}
@@ -70,26 +69,25 @@ export default function Home() {
         isSwitching={isSwitching}
       />
 
-      {/* Main Body */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-5 space-y-4">
-        {/* Compact System Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[#EDEAE1] border border-[#151413] text-[10px] text-[#7A756D]">
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-4 space-y-3">
+        {/* Router Status Strip */}
+        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1.5 bg-[#EDEAE1] border border-[#151413] text-[10px] text-[#7A756D]">
           <div className="flex items-center gap-2">
-            <span className="font-bold text-[#151413]">&gt; ROUTER_MODE: MULTIVARIATE</span>
+            <span className="font-bold text-[#151413]">&gt; ROUTER: MULTIVARIATE</span>
             <span>|</span>
-            <span>CACHE: <strong className="text-[#059669]">ENABLED</strong></span>
+            <span>CACHE: <strong className="text-[#059669]">ON</strong></span>
             <span>|</span>
             <span>MAX_TOKENS: <strong className="text-[#151413]">2048</strong></span>
           </div>
 
           <div className="flex items-center gap-3">
-            <span>SPLIT: <strong className="text-[#151413]">33 / 33 / 34</strong></span>
+            <span>SPLIT: <strong className="text-[#151413]">33/33/34</strong></span>
             <span>|</span>
             <span>METRIC: <strong className="text-[#059669]">answer_resolved</strong></span>
           </div>
         </div>
 
-        {/* View Switching */}
+        {/* Dynamic Views */}
         {activeTab === "copilot" && (
           <CopilotSandbox currentIdentity={currentIdentity} onEventTracked={addToast} />
         )}
@@ -123,14 +121,11 @@ export default function Home() {
         )}
       </main>
 
-      {/* Real-time Telemetry Toast Stream */}
       <ToastStream events={toasts} onDismiss={dismissToast} />
 
-      {/* Compact Status Footer */}
-      <footer className="border-t-[1.5px] border-[#151413] py-2 px-4 text-center text-[10px] text-[#7A756D] bg-[#EDEAE1]">
+      <footer className="border-t-[1.5px] border-[#151413] py-1.5 px-4 text-center text-[9px] text-[#7A756D] bg-[#EDEAE1]">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <span>ROUTESMITH AI // FLAGSMITH TRACK 01</span>
-          <span>FASTAPI + NEXT.JS // ZERO AI SLOP</span>
           <span>ONLINE</span>
         </div>
       </footer>
