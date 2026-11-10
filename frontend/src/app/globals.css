@@ -1,162 +1,192 @@
 @import "tailwindcss";
 
 :root {
-  --bg-canvas: #FAF8F5;
-  --bg-surface: #F3EFE8;
+  --bg-canvas: #F8F6F0;
+  --bg-surface: #EFECE3;
   --bg-card: #FFFFFF;
-  --border-card: #E7E3DA;
-  --border-subtle: #EFECE6;
-  --ink-primary: #181716;
-  --ink-secondary: #6B665E;
-  --ink-muted: #9C968B;
+  --border-ink: #151413;
+  --border-subtle: #D8D3C5;
+  --ink-primary: #151413;
+  --ink-secondary: #575249;
+  --ink-muted: #8A8376;
 
   --accent-emerald: #059669;
   --accent-emerald-bg: #ECFDF5;
-  --accent-emerald-border: #A7F3D0;
+  --accent-emerald-border: #059669;
   
   --accent-blue: #2563EB;
   --accent-blue-bg: #EFF6FF;
-  --accent-blue-border: #BFDBFE;
+  --accent-blue-border: #2563EB;
 
   --accent-amber: #D97706;
   --accent-amber-bg: #FFFBEB;
-  --accent-amber-border: #FDE68A;
+  --accent-amber-border: #D97706;
 
   --accent-purple: #7C3AED;
   --accent-purple-bg: #FAF5FF;
-  --accent-purple-border: #E9D5FF;
+  --accent-purple-border: #7C3AED;
 
-  --font-serif: "Newsreader", Charter, Cambria, Georgia, serif;
-  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-pixel: "Silkscreen", "JetBrains Mono", monospace;
   --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
 }
 
 body {
   background-color: var(--bg-canvas);
+  background-image: radial-gradient(#D8D2C2 1px, transparent 1px);
+  background-size: 14px 14px;
   color: var(--ink-primary);
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-.font-serif-display {
-  font-family: var(--font-serif);
+.font-pixel-display {
+  font-family: var(--font-pixel);
+  letter-spacing: -0.02em;
 }
 
 .font-mono-code {
   font-family: var(--font-mono);
 }
 
-/* Organic Highlighter Brush Accent */
-.highlighter-brush {
+/* Sleek Pixelated Cards */
+.pixel-card {
+  background-color: #FFFFFF;
+  border: 2px solid var(--border-ink);
+  box-shadow: 4px 4px 0px var(--border-ink);
   position: relative;
-  display: inline-block;
-  white-space: nowrap;
+  transition: all 0.15s ease;
 }
 
-.highlighter-brush::before {
-  content: "";
-  position: absolute;
-  left: -4px;
-  right: -4px;
-  bottom: 4px;
-  height: 48%;
-  background-color: #FEF08A;
-  z-index: -1;
-  transform: rotate(-1deg);
-  border-radius: 4px;
+.pixel-card-emerald {
+  background-color: #FFFFFF;
+  border: 2px solid var(--accent-emerald);
+  box-shadow: 4px 4px 0px var(--accent-emerald);
+  position: relative;
 }
 
-/* Tactile Pill Button */
-.tactile-btn {
+.pixel-card-dark {
+  background-color: #151413;
+  border: 2px solid var(--border-ink);
+  box-shadow: 4px 4px 0px var(--border-ink);
+  color: #F8F6F0;
+}
+
+/* Sleek Pixelated Tactile Buttons */
+.pixel-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-family: var(--font-sans);
+  font-family: var(--font-mono);
   font-size: 12px;
-  font-weight: 500;
+  font-weight: 600;
   padding: 6px 14px;
-  border-radius: 9999px;
-  border: 1px solid var(--border-card);
+  border: 1.5px solid var(--border-ink);
   background-color: #FFFFFF;
   color: var(--ink-primary);
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
-  transition: all 0.15s ease;
+  box-shadow: 2px 2px 0px var(--border-ink);
+  transition: transform 0.08s ease, box-shadow 0.08s ease, background-color 0.1s ease;
   cursor: pointer;
 }
 
-.tactile-btn:hover {
-  background-color: #F8F6F1;
-  border-color: #D3CDC1;
-  transform: translateY(-0.5px);
+.pixel-btn:hover {
+  background-color: #FAF8F5;
+  transform: translate(-1px, -1px);
+  box-shadow: 3px 3px 0px var(--border-ink);
 }
 
-.tactile-btn:active {
-  transform: translateY(0.5px);
-  box-shadow: none;
+.pixel-btn:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px var(--border-ink);
 }
 
-.tactile-btn-primary {
-  background-color: #181716;
-  color: #FAF8F5;
-  border-color: #181716;
+.pixel-btn-primary {
+  background-color: #151413;
+  color: #F8F6F0;
+  border: 2px solid #151413;
+  box-shadow: 3px 3px 0px #059669;
 }
 
-.tactile-btn-primary:hover {
-  background-color: #2D2A26;
-  color: #FFFFFF;
+.pixel-btn-primary:hover {
+  background-color: #262422;
+  box-shadow: 4px 4px 0px #059669;
 }
 
-.tactile-btn-emerald {
+.pixel-btn-primary:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0px #059669;
+}
+
+.pixel-btn-emerald {
   background-color: #059669;
   color: #FFFFFF;
-  border-color: #059669;
+  border: 2px solid #151413;
+  box-shadow: 2.5px 2.5px 0px #151413;
 }
 
-.tactile-btn-emerald:hover {
+.pixel-btn-emerald:hover {
   background-color: #047857;
+  transform: translate(-1px, -1px);
+  box-shadow: 3.5px 3.5px 0px #151413;
 }
 
-/* Card Container */
-.clean-card {
-  background-color: #FFFFFF;
-  border: 1px solid var(--border-card);
-  border-radius: 16px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
+.pixel-btn-emerald:active {
+  transform: translate(2px, 2px);
+  box-shadow: 0px 0px 0px #151413;
 }
 
-/* Keycap Tag */
-.keycap-tag {
+/* Micro Pixel Badges & Tags */
+.pixel-badge {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  padding: 1px 6px;
+  gap: 4px;
+  padding: 2px 8px;
   font-family: var(--font-mono);
   font-size: 11px;
-  color: var(--ink-secondary);
-  background-color: #F3EFE8;
-  border: 1px solid #DCD7CE;
-  border-bottom: 2px solid #C9C3B8;
-  border-radius: 5px;
+  font-weight: 600;
+  border: 1.5px solid var(--border-ink);
+  background-color: #EFECE3;
+  box-shadow: 1.5px 1.5px 0px var(--border-ink);
 }
 
-/* Custom Scrollbars */
-::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
-}
-::-webkit-scrollbar-track {
-  background: transparent;
-}
-::-webkit-scrollbar-thumb {
-  background: #D3CDC1;
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: #B8B0A2;
+.pixel-badge-emerald {
+  background-color: #D1FAE5;
+  color: #065F46;
+  border-color: #059669;
+  box-shadow: 1.5px 1.5px 0px #059669;
 }
 
-/* Dot Matrix Grid */
+.pixel-badge-amber {
+  background-color: #FEF3C7;
+  color: #92400E;
+  border-color: #D97706;
+  box-shadow: 1.5px 1.5px 0px #D97706;
+}
+
+.pixel-badge-purple {
+  background-color: #EDE9FE;
+  color: #5B21B6;
+  border-color: #7C3AED;
+  box-shadow: 1.5px 1.5px 0px #7C3AED;
+}
+
+/* Pixel Input */
+.pixel-input {
+  border: 2px solid var(--border-ink);
+  background-color: #FFFFFF;
+  box-shadow: 2px 2px 0px var(--border-ink);
+  font-family: var(--font-mono);
+  transition: all 0.1s ease;
+}
+
+.pixel-input:focus {
+  outline: none;
+  border-color: #059669;
+  box-shadow: 3px 3px 0px #059669;
+}
+
+/* Hardware Dot Matrix Grid */
 .dot-matrix {
   display: grid;
   grid-template-columns: repeat(25, minmax(0, 1fr));
@@ -172,7 +202,33 @@ body {
 .dot-unit {
   width: 100%;
   aspect-ratio: 1;
-  border-radius: 2px;
-  transition: background-color 0.15s ease;
+  border-radius: 1px;
+  transition: background-color 0.12s ease;
 }
 
+/* Scanline / Pixel Grid Accents */
+.pixel-header-accent {
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(21, 20, 19, 0.05),
+    rgba(21, 20, 19, 0.05) 1px,
+    transparent 1px,
+    transparent 2px
+  );
+}
+
+/* Custom Pixel Scrollbars */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: #EFECE3;
+  border-left: 1px solid var(--border-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: #151413;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #059669;
+}

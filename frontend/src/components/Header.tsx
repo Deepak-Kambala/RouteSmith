@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { RefreshCw } from "lucide-react";
+import { RefreshCw, Radio } from "lucide-react";
 import { FlagsmithEval, VariantType } from "@/lib/types";
 
 interface HeaderProps {
@@ -25,99 +25,99 @@ export const Header: React.FC<HeaderProps> = ({
   const weights = flagsEval?.traffic_weights || { fast_zero_shot: 33, clustered_hybrid_rag: 33, agentic_self_reflection: 34 };
   const isWinnerPromoted = weights.clustered_hybrid_rag === 100;
 
-  const variantMeta: Record<VariantType, { label: string; latency: string; colorClass: string }> = {
+  const variantMeta: Record<VariantType, { label: string; latency: string; badgeClass: string }> = {
     fast_zero_shot: {
-      label: "Variant A (Zero-Shot)",
+      label: "VAR A // ZERO-SHOT",
       latency: "540ms",
-      colorClass: "bg-amber-50 text-amber-900 border-amber-200"
+      badgeClass: "pixel-badge-amber"
     },
     clustered_hybrid_rag: {
-      label: isWinnerPromoted ? "Variant B (100% Production)" : "Variant B (Clustered Hybrid)",
-      latency: isWinnerPromoted ? "Winner" : "1080ms",
-      colorClass: isWinnerPromoted
-        ? "bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold"
-        : "bg-blue-50 text-blue-900 border-blue-200"
+      label: isWinnerPromoted ? "VAR B // 100% PRODUCTION" : "VAR B // CLUSTERED HYBRID",
+      latency: isWinnerPromoted ? "WINNER" : "1080ms",
+      badgeClass: "pixel-badge-emerald"
     },
     agentic_self_reflection: {
-      label: "Variant C (Agentic CoT)",
+      label: "VAR C // AGENTIC COT",
       latency: "2810ms",
-      colorClass: "bg-purple-50 text-purple-900 border-purple-200"
+      badgeClass: "pixel-badge-purple"
     }
   };
 
   const currentVariant = variantMeta[variant];
 
   return (
-    <header className="border-b border-[#E7E3DA] bg-[#FAF8F5]/90 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3">
+    <header className="border-b-2 border-[#151413] bg-[#F8F6F0] sticky top-0 z-40 px-4 lg:px-8 py-3">
       <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
         {/* Brand */}
         <div className="flex items-center gap-3">
-          <div className="flex items-baseline gap-1.5">
-            <span className="font-serif-display text-2xl font-bold tracking-tight text-[#181716]">
-              RouteSmith
+          <div className="flex items-center gap-2">
+            <span className="font-pixel-display text-lg font-bold tracking-tight text-[#151413] bg-[#151413] text-[#F8F6F0] px-2 py-0.5 shadow-[2px_2px_0px_#059669]">
+              ROUTESMITH
             </span>
-            <span className="text-xs font-mono-code text-[#9C968B] uppercase">AI</span>
+            <span className="text-[11px] font-bold tracking-widest text-[#575249]">
+              [AI]
+            </span>
           </div>
 
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono-code bg-[#F3EFE8] text-[#6B665E] border border-[#E7E3DA]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#059669]"></span>
-            Flagsmith A/B
-          </span>
+          <div className="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 text-[10px] font-bold bg-[#EFECE3] border border-[#151413] shadow-[1px_1px_0px_#151413]">
+            <Radio className="w-3 h-3 text-[#059669] animate-pulse" />
+            <span>FLAGSMITH A/B</span>
+          </div>
         </div>
 
-        {/* Simplified 3-Tab Navigator */}
-        <nav className="flex items-center bg-[#F3EFE8] p-1 rounded-full border border-[#E7E3DA] text-xs font-medium">
+        {/* Pixel Tab Switcher */}
+        <nav className="flex items-center gap-1.5 p-1 bg-[#EFECE3] border-2 border-[#151413] shadow-[2px_2px_0px_#151413]">
           <button
             onClick={() => setActiveTab("copilot")}
-            className={`px-4 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1 text-xs font-bold transition-all ${
               activeTab === "copilot"
-                ? "bg-white text-[#181716] shadow-xs font-semibold"
-                : "text-[#6B665E] hover:text-[#181716]"
+                ? "bg-[#151413] text-[#F8F6F0] shadow-[1.5px_1.5px_0px_#059669]"
+                : "bg-transparent text-[#575249] hover:text-[#151413] hover:bg-white"
             }`}
           >
-            Copilot &amp; Sandbox
+            [01] COPILOT
           </button>
           <button
             onClick={() => setActiveTab("lab")}
-            className={`px-4 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1 text-xs font-bold transition-all ${
               activeTab === "lab"
-                ? "bg-white text-[#181716] shadow-xs font-semibold"
-                : "text-[#6B665E] hover:text-[#181716]"
+                ? "bg-[#151413] text-[#F8F6F0] shadow-[1.5px_1.5px_0px_#059669]"
+                : "bg-transparent text-[#575249] hover:text-[#151413] hover:bg-white"
             }`}
           >
-            Experiment Lab &amp; Rollout
+            [02] EXPERIMENT LAB
           </button>
           <button
             onClick={() => setActiveTab("custom_data")}
-            className={`px-4 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1 text-xs font-bold transition-all ${
               activeTab === "custom_data"
-                ? "bg-white text-[#181716] shadow-xs font-semibold"
-                : "text-[#6B665E] hover:text-[#181716]"
+                ? "bg-[#151413] text-[#F8F6F0] shadow-[1.5px_1.5px_0px_#059669]"
+                : "bg-transparent text-[#575249] hover:text-[#151413] hover:bg-white"
             }`}
           >
-            Custom Data
+            [03] CUSTOM DATA
           </button>
         </nav>
 
         {/* Identity & Active Variant */}
         <div className="flex items-center gap-2">
           {/* Active Variant Pill */}
-          <div
-            className={`px-2.5 py-1 rounded-full border text-xs font-mono-code flex items-center gap-2 ${currentVariant.colorClass}`}
-          >
+          <div className={`pixel-badge ${currentVariant.badgeClass}`}>
             <span>{currentVariant.label}</span>
-            <span className="keycap-tag text-[10px] py-0">{currentVariant.latency}</span>
+            <span className="text-[9px] px-1 bg-white/70 border border-current ml-1">
+              {currentVariant.latency}
+            </span>
           </div>
 
           {/* Reroll Button */}
           <button
             onClick={onNewSession}
             disabled={isSwitching}
-            className="tactile-btn py-1 px-3 text-xs flex items-center gap-1.5 disabled:opacity-50"
-            title="Generate a new session ID to test the 33/33/34 traffic split"
+            className="pixel-btn text-xs py-1 px-2.5 flex items-center gap-1.5 disabled:opacity-50"
+            title="Generate a new session ID to test multivariate flag hash routing"
           >
             <RefreshCw className={`w-3 h-3 ${isSwitching ? "animate-spin" : ""}`} />
-            <span>Reroll Identity</span>
+            <span>REROLL</span>
           </button>
         </div>
       </div>

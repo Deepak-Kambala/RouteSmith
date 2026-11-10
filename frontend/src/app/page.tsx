@@ -59,7 +59,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#181716]">
+    <div className="min-h-screen flex flex-col font-mono text-[#151413]">
       <Header
         currentIdentity={currentIdentity}
         flagsEval={flagsEval}
@@ -69,25 +69,29 @@ export default function Home() {
         isSwitching={isSwitching}
       />
 
-      <main className="flex-1 max-w-6xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
-        {/* Active Tab View */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 lg:px-8 py-5 space-y-5">
+        {/* Dynamic Views */}
         {activeTab === "copilot" && (
           <CopilotSandbox currentIdentity={currentIdentity} onEventTracked={addToast} />
         )}
 
         {activeTab === "lab" && (
-          <div className="space-y-6">
-            <div className="text-center max-w-2xl mx-auto pt-2 pb-1 space-y-2">
-              <h1 className="font-serif-display text-3xl sm:text-4xl font-bold tracking-tight text-[#181716]">
-                Experimentation Lab &amp; Rollout
-              </h1>
-              <p className="text-sm text-[#6B665E]">
-                Simulate large developer swarms, compute{" "}
-                <span className="highlighter-brush font-medium text-[#181716]">Bayesian posterior probability</span>, and promote winners with 1 click.
-              </p>
+          <div className="space-y-5">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 p-3 bg-[#EFECE3] border-2 border-[#151413] shadow-[3px_3px_0px_#151413]">
+              <div className="flex items-center gap-2">
+                <span className="font-pixel-display text-xs font-bold bg-[#151413] text-[#F8F6F0] px-2 py-0.5">
+                  EXPERIMENT LAB
+                </span>
+                <span className="text-xs text-[#575249]">
+                  1,500 Developer Swarm &amp; Bayesian Beta posterior inference
+                </span>
+              </div>
+              <div className="text-[11px] font-bold text-[#151413]">
+                CONFIDENCE: <span className="text-[#059669]">97.4% (VAR B WINNER)</span>
+              </div>
             </div>
 
-            <div className="grid grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 gap-5">
               <SwarmSimulator
                 onSwarmCompleted={() => {
                   addToast({
@@ -118,10 +122,17 @@ export default function Home() {
 
       <ToastStream events={toasts} onDismiss={dismissToast} />
 
-      <footer className="border-t border-[#E7E3DA] py-4 px-4 text-xs text-[#9C968B] bg-[#FAF8F5]">
+      <footer className="border-t-2 border-[#151413] py-3 px-4 text-xs text-[#575249] bg-[#EFECE3]">
         <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
-          <span>RouteSmith AI — Flagsmith Multivariate RAG Gateway</span>
-          <span className="font-mono-code text-[11px]">System Status: Operational</span>
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[#151413]">ROUTESMITH AI</span>
+            <span>//</span>
+            <span>FLAGSMITH BAYESIAN GATEWAY</span>
+          </div>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span>SYSTEM: <strong className="text-[#059669]">ONLINE</strong></span>
+            <span>TRAFFIC: <strong className="text-[#151413]">33/33/34</strong></span>
+          </div>
         </div>
       </footer>
     </div>

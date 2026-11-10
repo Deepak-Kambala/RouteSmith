@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { Zap, Users, ArrowUpRight } from "lucide-react";
+import { Zap, Users } from "lucide-react";
 import { runSwarm } from "@/lib/api";
 
 interface SwarmSimulatorProps {
@@ -26,7 +26,7 @@ export const SwarmSimulator: React.FC<SwarmSimulatorProps> = ({ onSwarmCompleted
       step++;
       setActiveDotsCount(Math.min(userCount, Math.floor((step / totalSteps) * userCount)));
       if (step >= totalSteps) clearInterval(interval);
-    }, 60);
+    }, 55);
 
     try {
       const result = await runSwarm(userCount);
@@ -50,39 +50,43 @@ export const SwarmSimulator: React.FC<SwarmSimulatorProps> = ({ onSwarmCompleted
   const activeDisplayDots = Math.floor((activeDotsCount / userCount) * totalDisplayDots);
 
   return (
-    <div className="clean-card p-6 space-y-5">
+    <div className="pixel-card p-5 space-y-4">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-[#E7E3DA]">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-3 border-b-2 border-[#151413]">
         <div>
-          <h2 className="text-base font-semibold text-[#181716] flex items-center gap-2">
-            <Users className="w-4 h-4 text-[#059669]" />
-            <span>Developer Swarm Simulator</span>
-          </h2>
-          <p className="text-xs text-[#6B665E] mt-0.5">
-            Concurrently simulate developer personas across the 33/33/34 traffic split.
+          <div className="flex items-center gap-2">
+            <span className="font-pixel-display text-xs font-bold bg-[#151413] text-[#F8F6F0] px-2 py-0.5">
+              SWARM ENGINE
+            </span>
+            <span className="text-xs font-bold text-[#151413]">
+              CONCURRENT DEVELOPER SESSIONS ({userCount.toLocaleString()})
+            </span>
+          </div>
+          <p className="text-[11px] text-[#575249] mt-0.5">
+            SPLIT: 33% VAR_A (540ms) // 33% VAR_B (1080ms) // 34% VAR_C (2810ms)
           </p>
         </div>
 
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <span className="text-xs text-[#9C968B] block">Volume</span>
-            <span className="text-sm font-semibold text-[#181716]">{userCount.toLocaleString()} sessions</span>
+            <span className="text-[10px] text-[#8A8376] block">SESSIONS</span>
+            <span className="text-xs font-bold text-[#151413]">{userCount.toLocaleString()} IDs</span>
           </div>
 
           <button
             onClick={handleRunSwarm}
             disabled={isRunning}
-            className="tactile-btn tactile-btn-emerald py-2 px-4 text-xs font-semibold flex items-center gap-1.5 disabled:opacity-50"
+            className="pixel-btn pixel-btn-emerald py-1.5 px-3.5 text-xs font-bold flex items-center gap-1.5 disabled:opacity-50"
           >
             <Zap className={`w-3.5 h-3.5 ${isRunning ? "animate-spin" : ""}`} />
-            <span>{isRunning ? "Simulating..." : "Run Swarm"}</span>
+            <span>{isRunning ? "INGESTING..." : "RUN SWARM"}</span>
           </button>
         </div>
       </div>
 
-      {/* Volume Slider */}
-      <div className="flex items-center gap-3 px-3 py-2 rounded-xl bg-[#FAF8F5] border border-[#E7E3DA]">
-        <span className="text-xs font-mono-code text-[#9C968B]">100</span>
+      {/* Volume Slider Bar */}
+      <div className="flex items-center gap-3 p-2 bg-[#EFECE3] border border-[#151413] shadow-[1.5px_1.5px_0px_#151413]">
+        <span className="text-[10px] font-bold text-[#575249]">100</span>
         <input
           type="range"
           min="100"
@@ -92,27 +96,27 @@ export const SwarmSimulator: React.FC<SwarmSimulatorProps> = ({ onSwarmCompleted
           onChange={(e) => setUserCount(Number(e.target.value))}
           disabled={isRunning}
           aria-label="Developer volume"
-          className="flex-1 accent-[#181716] cursor-pointer"
+          className="flex-1 accent-[#151413] cursor-pointer"
         />
-        <span className="text-xs font-mono-code text-[#9C968B]">2,000</span>
+        <span className="text-[10px] font-bold text-[#575249]">2,000</span>
       </div>
 
       {/* Hardware Dot Matrix */}
-      <div className="p-4 rounded-xl bg-[#181716] space-y-2.5 shadow-inner">
-        <div className="flex items-center justify-between text-xs font-mono-code text-[#9C968B] border-b border-[#2D2A26] pb-2">
-          <span>Active Sessions: {activeDotsCount} / {userCount}</span>
-          <div className="flex items-center gap-3 text-[11px]">
-            <span className="text-[#FBBF24]">Variant A (33%)</span>
-            <span className="text-[#34D399] font-semibold">Variant B (33%)</span>
-            <span className="text-[#C084FC]">Variant C (34%)</span>
+      <div className="p-3 bg-[#151413] border-2 border-[#151413] shadow-[2.5px_2.5px_0px_#151413] space-y-2">
+        <div className="flex items-center justify-between text-[10px] font-mono-code text-[#8A8376] border-b border-[#2D2A26] pb-1.5">
+          <span>DOT MATRIX // {activeDotsCount} OF {userCount} IDENTITIES DISPATCHED</span>
+          <div className="flex items-center gap-3">
+            <span className="text-[#FBBF24]">VAR A (33%)</span>
+            <span className="text-[#34D399] font-bold">VAR B (33%)</span>
+            <span className="text-[#C084FC]">VAR C (34%)</span>
           </div>
         </div>
 
-        <div className="dot-matrix py-1">
+        <div className="dot-matrix py-0.5">
           {Array.from({ length: totalDisplayDots }).map((_, i) => {
             const isActive = i < activeDisplayDots;
             const dotColor = !isActive
-              ? "bg-[#2D2A26]"
+              ? "bg-[#262422]"
               : i % 3 === 0
               ? "bg-[#FBBF24]"
               : i % 3 === 1
@@ -125,56 +129,56 @@ export const SwarmSimulator: React.FC<SwarmSimulatorProps> = ({ onSwarmCompleted
       </div>
 
       {/* Developer Personas */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-        <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E7E3DA] space-y-1">
-          <div className="font-semibold text-[#181716]">Hacker Persona</div>
-          <p className="text-[#6B665E] leading-relaxed">
-            Prioritizes latency (&lt;1500ms). Abandons slow pipelines like Variant C.
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+        <div className="p-2.5 bg-[#EFECE3] border border-[#151413] shadow-[1.5px_1.5px_0px_#151413] space-y-0.5">
+          <div className="font-bold text-[#151413] text-[11px]">[01] HACKER PERSONA</div>
+          <p className="text-[#575249] text-[11px] leading-tight">
+            Threshold: &lt;1500ms. Abandons high latency pipeline (Var C).
           </p>
         </div>
 
-        <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E7E3DA] space-y-1">
-          <div className="font-semibold text-[#059669]">Architect Persona</div>
-          <p className="text-[#6B665E] leading-relaxed">
-            Prioritizes correctness. Converts heavily on Variant B (Clustered Hybrid).
+        <div className="p-2.5 bg-[#EFECE3] border border-[#151413] shadow-[1.5px_1.5px_0px_#151413] space-y-0.5">
+          <div className="font-bold text-[#059669] text-[11px]">[02] ARCHITECT PERSONA</div>
+          <p className="text-[#575249] text-[11px] leading-tight">
+            Strict correctness. Verifies AST. Converts predominantly on Var B.
           </p>
         </div>
 
-        <div className="p-3 rounded-xl bg-[#FAF8F5] border border-[#E7E3DA] space-y-1">
-          <div className="font-semibold text-[#2563EB]">Pragmatist Persona</div>
-          <p className="text-[#6B665E] leading-relaxed">
-            Runs snippets in sandbox. Balances speed with verifiable accuracy.
+        <div className="p-2.5 bg-[#EFECE3] border border-[#151413] shadow-[1.5px_1.5px_0px_#151413] space-y-0.5">
+          <div className="font-bold text-[#2563EB] text-[11px]">[03] PRAGMATIST PERSONA</div>
+          <p className="text-[#575249] text-[11px] leading-tight">
+            Runs code in isolated sandbox. Balances speed with reliability.
           </p>
         </div>
       </div>
 
-      {/* Swarm Telemetry Results */}
+      {/* Swarm Telemetry Ingestion Results */}
       {simulationResult && (
-        <div className="p-4 rounded-xl bg-[#ECFDF5] border border-[#A7F3D0] space-y-3">
-          <div className="flex items-center justify-between text-xs font-semibold text-[#065F46]">
-            <span>Simulation Ingested: {simulationResult.total_exposures} exposures ({simulationResult.total_conversions} conversions)</span>
-            <span className="text-[11px] font-mono-code px-2 py-0.5 rounded-full bg-[#D1FAE5] border border-[#A7F3D0]">
-              Telemetry Synced
+        <div className="pixel-card-emerald p-3.5 space-y-2.5">
+          <div className="flex items-center justify-between text-xs font-bold text-[#065F46]">
+            <span>INGESTED: {simulationResult.total_exposures} EXPOSURES // {simulationResult.total_conversions} CONVERSIONS</span>
+            <span className="pixel-badge pixel-badge-emerald text-[10px]">
+              COMMITTED
             </span>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-xs">
-            <div className="p-3 rounded-lg bg-white border border-[#A7F3D0]">
-              <span className="text-[#6B665E] block">Variant A (Zero-Shot)</span>
-              <span className="text-base font-bold text-[#181716]">11.2% Conversion</span>
-              <span className="text-[11px] text-[#9C968B] block mt-0.5">56 / 500 converted (540ms)</span>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-2.5 text-xs">
+            <div className="p-2.5 bg-white border border-[#151413] shadow-[1px_1px_0px_#151413]">
+              <span className="text-[10px] text-[#8A8376] block">VAR A (fast_zero_shot)</span>
+              <span className="text-base font-bold text-[#151413]">11.2% CONV</span>
+              <span className="text-[10px] text-[#575249] block">56 / 500 | 540ms</span>
             </div>
 
-            <div className="p-3 rounded-lg bg-white border-2 border-[#059669] shadow-xs">
-              <span className="text-[#059669] font-semibold block">Variant B (Hybrid) [Winner]</span>
-              <span className="text-base font-bold text-[#059669]">24.8% Conversion</span>
-              <span className="text-[11px] text-[#059669] block mt-0.5">124 / 500 converted (1080ms)</span>
+            <div className="p-2.5 bg-white border-2 border-[#059669] shadow-[2px_2px_0px_#059669]">
+              <span className="text-[10px] font-bold text-[#059669] block">VAR B (clustered_hybrid) [WINNER]</span>
+              <span className="text-base font-bold text-[#059669]">24.8% CONV</span>
+              <span className="text-[10px] text-[#059669] block font-semibold">124 / 500 | 1080ms</span>
             </div>
 
-            <div className="p-3 rounded-lg bg-white border border-[#A7F3D0]">
-              <span className="text-[#6B665E] block">Variant C (Agentic CoT)</span>
-              <span className="text-base font-bold text-[#181716]">16.5% Conversion</span>
-              <span className="text-[11px] text-[#9C968B] block mt-0.5">83 / 500 converted (2810ms)</span>
+            <div className="p-2.5 bg-white border border-[#151413] shadow-[1px_1px_0px_#151413]">
+              <span className="text-[10px] text-[#8A8376] block">VAR C (agentic_cot)</span>
+              <span className="text-base font-bold text-[#151413]">16.5% CONV</span>
+              <span className="text-[10px] text-[#575249] block">83 / 500 | 2810ms</span>
             </div>
           </div>
         </div>
