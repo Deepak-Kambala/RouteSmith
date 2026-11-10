@@ -2,7 +2,7 @@
 ### *Self-Optimizing LLM Gateway & AI Docs Assistant Powered by Flagsmith Bayesian Experimentation*
 
 [![Track 01: Flagsmith Hackathon Winner Candidate](https://img.shields.io/badge/Flagsmith_Track_01-Feature_Flagging_%26_A%2FB_Testing-6366f1?style=for-the-badge&logo=flagsmith&logoColor=white)](https://flagsmith.com)
-[![Next.js 15](https://img.shields.io/badge/Frontend-Next.js_15_App_Router-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
+[![Next.js 16](https://img.shields.io/badge/Frontend-Next.js_16_App_Router-black?style=for-the-badge&logo=next.js)](https://nextjs.org)
 [![FastAPI](https://img.shields.io/badge/Backend-FastAPI_Python_SDK-009688?style=for-the-badge&logo=fastapi)](https://fastapi.tiangolo.com)
 [![Bayesian Engine](https://img.shields.io/badge/Math-Beta--Binomial_MCMC_Engine-f59e0b?style=for-the-badge)](https://en.wikipedia.org/wiki/Conjugate_prior)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](LICENSE)
@@ -17,9 +17,13 @@ Most experimentation entries test cosmetic UI variations (such as green vs. blue
 
 RouteSmith AI wires Flagsmith directly into the core AI execution graph:
 1. **Dynamic Architecture Routing via Multivariate Flags:** Instead of toggling styling, Flagsmith dynamically alters the backend execution graph between three distinct RAG topologies.
-2. **Built-in Swarm Traffic & Evaluation Simulator:** Solves the classic hackathon problem of sample starvation (0% confidence from 5 test clicks) by executing up to **2,000 persona-modeled synthetic developer sessions** live during the evaluation.
+2. **Built-in Swarm Traffic & Evaluation Simulator:** Solves the classic hackathon problem of sample starvation (0% confidence from 5 test clicks) by executing up to **2,000 persona-modeled synthetic developer sessions** live during evaluation.
 3. **Real-time Bayesian Posterior Convergence:** Computes closed-form Beta-Binomial posterior distributions and Monte Carlo win probabilities ($P(\text{Variant B is optimal}) = 97.4\%$) live in front of the evaluator.
 4. **Zero-Downtime 1-Click Winner Promotion:** Promotes the winning variant directly through the **Flagsmith Admin API** from `33/33/34` to `0/100/0` traffic allocation without redeploying code.
+5. **Dynamic Custom Data Ingestion:** Allows developers to index custom APIs, specifications, or product guides on the fly via UI or REST API.
+6. **Zero External API Requirement:** Fully functional out of the box with built-in deterministic hashing, offline simulation, and mathematical inference.
+
+For detailed operational instructions, consult the complete [guide.md](guide.md).
 
 ---
 
@@ -70,7 +74,7 @@ The application includes an embedded **Interactive Architecture & Round Controll
 ## System Architecture
 
 ```
-[ Developer Client UI (Next.js 15) ]
+[ Developer Client UI (Next.js 16) ]
        |  1. Provide identity_id ("user_8841f") + traits
        v
 [ RouteSmith Router (FastAPI Backend) ] ---(2. get_identity_flags)---> [ Flagsmith Cloud SDK ]
@@ -96,33 +100,30 @@ The application includes an embedded **Interactive Architecture & Round Controll
 
 ## Key Feature Modules
 
-### 1. Interactive Developer Copilot UI (`/frontend`)
-* **Live Variant Identity Badge (Debug HUD):** Collapsible HUD showing active `identity_id`, assigned `rag_pipeline_strategy`, active guardrail flags (`enable_semantic_cache`, `max_context_tokens`), and a live JSON inspector of the raw Flagsmith SDK evaluation payload.
-* **Interactive Query & Code Sandbox:** Pre-loaded with official Flagsmith Python/Node SDK documentation, FastAPI specifications, and complex async edge cases. Answers include executable code snippets and immediate sandbox execution testing.
-* **Real-time Telemetry Toast Stream:** Real-time event toast notifications popping up upon exposure evaluation and conversion dispatch (`EXPOSURE: identity=user_8841f -> Variant B`, `EVENT TRACKED: metric=answer_resolved | latency=1080ms`).
-* **Instant Identity Switcher:** Generates fresh UUID identities on demand to demonstrate Flagsmith's deterministic hashing and 33/33/34 traffic partitioning live.
+### 1. Neo-Tactile Developer Console (`/frontend`)
+* **Pixelated High-Precision UI:** Inspired by Teenage Engineering and developer control units. 1.5px ink borders, 2px hard drop shadows, and subtle micro-dot grid background. Zero AI slop, zero text bloat.
+* **Live Variant Identity Badge:** Shows active `identity_id`, assigned `rag_pipeline_strategy`, active guardrails (`enable_semantic_cache`, `max_context_tokens`), and real-time payload inspection.
+* **Instant Identity Switcher (`[REROLL]`):** Generates fresh UUID identities on demand to demonstrate Flagsmith's deterministic hashing and 33/33/34 traffic partitioning live.
+* **Real-Time Telemetry Toast Stream:** Bottom-right notifications popping up upon exposure evaluation and conversion dispatch.
 
-### 2. Flagsmith-Driven Dynamic Backend Router (`/backend`)
-* **Zero-Shot Fast LLM (`fast_zero_shot`):** Top-3 cosine similarity retrieval with temperature $0.2$, optimized for raw throughput.
-* **Clustered Hybrid RAG (`clustered_hybrid_rag`):** Top-15 chunk retrieval, k-means / semantic centroid clustering to deduplicate docs, followed by BM25 keyword reranking.
-* **Agentic CoT Verifier (`agentic_self_reflection`):** Two-stage generator and AST syntax critic that inspects generated code for compiler/lint errors before streaming to the client.
-* **Dynamic Guardrail Flags:**
-  * `enable_semantic_cache` (*Boolean*): Dynamically switches Redis/in-memory embedding cache on or off.
-  * `max_context_tokens` (*Remote Config Integer*): Adjusts context token budgets ($2048$ vs $4096$) without restarting the container.
+### 2. Custom Knowledge Base Ingestion (`02//Custom Data`)
+* Ingest custom documentation chunks (API references, internal architecture, code specs) on the fly via UI or REST API (`POST /api/docs`).
+* All 3 RAG execution variants dynamically index and query across your active ingested dataset.
+* Quick presets for instant testing: `[Payments API]`, `[Database]`, and `[RESET]` to restore defaults.
 
-### 3. Swarm Traffic Simulator (`/simulator`)
-* **Configurable Synthetic Cohorts:** Slider for $100$ to $2,000$ simulated users (default: $1,500$).
-* **Persona-Driven Behavioral Engine:** Simulates realistic engineer archetypes:
-  * *The Impatient Hacker:* Bounces if latency exceeds $1500\text{ ms}$.
-  * *The Senior Architect:* Demands syntactically valid code; bounces on hallucinations.
-  * *The Pragmatist:* Converts when code runs cleanly within reasonable latency bounds.
-* **Asynchronous Streaming Workers:** Concurrently fires Flagsmith SDK identity requests, generates realistic dwell times, and dispatches conversions with live websocket progress updates.
+### 3. Swarm Traffic Simulator with 500-Dot Hardware Matrix (`03//1500 Swarm`)
+* Configurable Synthetic Cohorts: Slider for 100 to 2,000 simulated users (default: 1,500).
+* Persona-Driven Behavioral Engine:
+  * *Impatient Hacker:* Bounces if latency exceeds 1500ms (Abandons Variant C).
+  * *Senior Architect:* Demands syntactically valid code (Converts on Variant B).
+  * *Pragmatist:* Tests code in sandbox runner (Balanced).
+* 500-Dot Interactive Matrix: Visualizes real-time identity traffic across Variant A (amber), Variant B (emerald), and Variant C (purple).
 
-### 4. Bayesian Telemetry & 1-Click Winner Rollout Panel
-* **Live Variant Metrics Cards:** Displays Exposures, Conversions, Conversion Rate (%), Mean Latency (ms), and Token Cost per Resolved Ticket ($).
-* **Bayesian Posterior Distribution Chart:** Real-time SVG/Canvas rendering of the Beta distribution PDF curves:
+### 4. Bayesian Telemetry & 1-Click Winner Rollout Panel (`04//Bayesian`)
+* Live Variant Metrics Cards: Displays Exposures, Conversions, Conversion Rate (%), Mean Latency (ms), and Cost ($).
+* Bayesian Posterior Distribution Chart: Real-time SVG rendering of Beta distribution curves:
   $$\text{Beta}(\alpha + y_i, \, \beta + n_i - y_i)$$
-* **One-Click Promotion:** Once win probability exceeds $95\%$, an authenticated action triggers the Flagsmith Admin API to lock the winning variant at $100\%$ production allocation.
+* One-Click Promotion: Once win probability exceeds 95%, triggers the Flagsmith Admin API to lock the winning variant at 100% production allocation (`0 / 100 / 0`).
 
 ---
 
@@ -141,7 +142,7 @@ For each variant $i \in \{A, B, C\}$:
 * **Variant C:** $\alpha_C = 1 + 83 = 84, \quad \beta_C = 1 + 500 - 83 = 418$
 
 ### 2. Monte Carlo Win Probability
-The probability that Variant B is superior to both Variant A and Variant C is calculated via Monte Carlo sampling ($S = 100,000$ iterations):
+The probability that Variant B is superior to both Variant A and Variant C is calculated via Monte Carlo sampling ($S = 50,000$ iterations):
 
 $$P(\theta_B > \max(\theta_A, \theta_C)) = \frac{1}{S} \sum_{s=1}^S \mathbb{I}\left(\theta_B^{(s)} > \theta_A^{(s)} \land \theta_B^{(s)} > \theta_C^{(s)}\right) \approx 97.4\%$$
 
@@ -151,101 +152,69 @@ $$P(\theta_B > \max(\theta_A, \theta_C)) = \frac{1}{S} \sum_{s=1}^S \mathbb{I}\l
 
 ```
 routesmith-ai/
-|-- README.md
-|-- plan.md
-|-- docker-compose.yml
-|-- .env.example
-|-- backend/                        # FastAPI (Python 3.11) Backend
+|-- README.md                       # Architectural Blueprint & Criteria
+|-- guide.md                        # Operator Manual & Step-by-Step Guide
+|-- plan.md                         # Master Engineering Plan
+|-- backend/                        # FastAPI (Python 3.11+) Backend
 |   |-- app/
 |   |   |-- main.py                 # FastAPI application root & API router
-|   |   |-- config.py               # Flagsmith SDK & environment configuration
+|   |   |-- config.py               # Environment & flag configuration
 |   |   |-- flagsmith_service.py    # Identity flag evaluation & analytics dispatcher
 |   |   |-- admin_api.py            # Flagsmith Admin API client (1-click rollout)
+|   |   |-- gemini_service.py       # Optional Google Gemini LLM integration
 |   |   |-- pipelines/
 |   |   |   |-- router.py           # Dynamic RAG pipeline selector
 |   |   |   |-- fast_zero_shot.py   # Variant A implementation
-|   |   |   |-- clustered_rag.py    # Variant B implementation
+|   |   |   |-- clustered_hybrid_rag.py # Variant B implementation
 |   |   |   \-- agentic_cot.py      # Variant C implementation
 |   |   |-- simulator/
 |   |   |   |-- swarm_worker.py     # Persona-based 1,500 user synthetic generator
-|   |   |   \-- bayesian_engine.py  # Beta-Binomial MCMC win probability calculator
-|   |   \-- docs_corpus/            # Sample technical documentation dataset
+|   |   |   \-- bayesian_math.py    # Beta-Binomial MCMC win probability calculator
+|   |   \-- docs/
+|   |       |-- doc_manager.py      # Dynamic custom knowledge base store
+|   |       \-- flagsmith_docs.py   # Default documentation dataset
 |   \-- requirements.txt
-\-- frontend/                       # Next.js 15 (App Router) + Tailwind + shadcn/ui
+\-- frontend/                       # Next.js 16 (App Router) + Tailwind CSS v4
     |-- src/
     |   |-- app/
-    |   |   |-- page.tsx            # Main Copilot Interface & Chat Sandbox
-    |   |   |-- lab/page.tsx        # Experiment Lab & Swarm Traffic Simulator
-    |   |   \-- api/                # API client routes
+    |   |   |-- page.tsx            # Unified Copilot & Developer Workspace
+    |   |   |-- layout.tsx          # Font optimization & root layout
+    |   |   |-- globals.css         # Neo-tactile pixel craft styles
+    |   |   \-- tailwind.css        # Compiled static stylesheet
     |   |-- components/
-    |   |   |-- hud/VariantBadge.tsx          # Debug identity bar
-    |   |   |-- rounds/RoundNavigator.tsx     # 4-Round Interactive Architecture Diagram
-    |   |   |-- chat/CopilotSandbox.tsx       # Query box, code sandbox, copy triggers
-    |   |   |-- analytics/BayesianCards.tsx   # Variant metric cards & Beta curves
-    |   |   \-- telemetry/ToastStream.tsx     # Flagsmith exposure & event stream
+    |   |   |-- Header.tsx          # Brand, identity reroll, segmented tabs
+    |   |   |-- CopilotSandbox.tsx  # Ingress query box, code display, stdout runner
+    |   |   |-- CustomDocsManager.tsx # Custom knowledge base ingestion
+    |   |   |-- SwarmSimulator.tsx  # 500-dot matrix & 1,500 synthetic swarm
+    |   |   |-- BayesianAnalytics.tsx # Beta density curves & 1-click rollout
+    |   |   |-- RoundNavigator.tsx  # 4-round architecture lifecycle visualizer
+    |   |   \-- ToastStream.tsx     # Real-time event toast notifications
     |   \-- lib/
-    |       \-- flagsmith-client.ts           # Flagsmith JS/React SDK integration
-    |-- package.json
-    \-- tailwind.config.ts
+    |       |-- api.ts              # REST client with offline fallback
+    |       \-- types.ts            # TypeScript interfaces
+    \-- package.json
 ```
 
 ---
 
 ## Quickstart & Setup Guide
 
-### Prerequisites
-* Python 3.11+
-* Node.js 18+ & pnpm / npm
-* Flagsmith Cloud Account (Free tier or higher)
-
-### 1. Environment Configuration
-Clone the repository and copy the environment template:
-```bash
-cp .env.example .env
-```
-
-Configure your Flagsmith environment keys in `.env`:
-```env
-# Flagsmith Cloud Credentials
-FLAGSMITH_ENVIRONMENT_KEY=ser.YOUR_SERVER_SIDE_ENVIRONMENT_KEY
-FLAGSMITH_CLIENT_KEY=YOUR_CLIENT_SIDE_ENVIRONMENT_KEY
-FLAGSMITH_ADMIN_API_KEY=YOUR_FLAGSMITH_ADMIN_API_KEY
-FLAGSMITH_PROJECT_ID=YOUR_PROJECT_ID
-FLAGSMITH_FEATURE_ID=YOUR_RAG_PIPELINE_FEATURE_ID
-
-# LLM Providers (Pick one or use simulated mock fallback)
-GROQ_API_KEY=gsk_...
-GEMINI_API_KEY=AIzaSy...
-```
-
-### 2. Backend Setup
+### 1. Backend Setup
 ```bash
 cd backend
-python -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
-uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+python3 -m pip install -r requirements.txt
+uvicorn app.main:app --host 127.0.0.1 --port 8000
 ```
 
-### 3. Frontend Setup
+### 2. Frontend Setup
 ```bash
 cd frontend
 npm install
-npm run dev
+npm run build
+npm run start -- -p 3000
 ```
+
 Open [http://localhost:3000](http://localhost:3000) in your browser.
-
----
-
-## 3-Minute Demo Video Walkthrough Script
-
-| Time | Screen / Feature | Narration & Key Actions |
-|---|---|---|
-| **0:00 - 0:40** | **The Copilot UI & Problem** | "Judges, 90% of hackathon entries test button colors. RouteSmith AI tests which generative AI pipeline resolves developer queries with the highest accuracy at the lowest latency. Watch our HUD: session `user_8841f` is automatically routed to Variant B." |
-| **0:41 - 1:15** | **Identity Switcher & Telemetry** | "When I click 'New User Session', Flagsmith deterministically re-evaluates us into Variant A or C. As I click 'Copy Working Code', notice the real-time telemetry toast: `answer_resolved` is dispatched to Flagsmith's data warehouse." |
-| **1:16 - 2:05** | **The Swarm Traffic Simulator** | "A/B tests fail when there's insufficient data. In our Experiment Lab, we launch 1,500 persona-modeled synthetic engineers against the Flagsmith SDK. Real-world latency and code-quality heuristics simulate realistic bounce rates." |
-| **2:06 - 2:40** | **Bayesian Convergence & Win Probability** | "As the 1,500 identities complete, Flagsmith's Bayesian engine processes the posterior distributions. Variant B achieves a 24.8% conversion rate - a +121.4% lift - reaching a 97.4% win probability." |
-| **2:41 - 3:00** | **1-Click Rollout to 100% Production** | "With one click on 'Promote Variant B to Production', we call the Flagsmith Admin API to update the multivariate split from 33/33/34 to 100% Variant B with zero downtime." |
 
 ---
 

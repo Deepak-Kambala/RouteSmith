@@ -49,3 +49,4 @@ class DocumentManager:
         return self.docs
 
 doc_manager = DocumentManager()
+
