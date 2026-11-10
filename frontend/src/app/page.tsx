@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
-import { RoundNavigator } from "@/components/RoundNavigator";
 import { CopilotSandbox } from "@/components/CopilotSandbox";
 import { SwarmSimulator } from "@/components/SwarmSimulator";
 import { BayesianAnalytics } from "@/components/BayesianAnalytics";
@@ -14,7 +13,7 @@ import { fetchFlags } from "@/lib/api";
 export default function Home() {
   const [currentIdentity, setCurrentIdentity] = useState<string>("user_8841f");
   const [flagsEval, setFlagsEval] = useState<FlagsmithEval | null>(null);
-  const [activeTab, setActiveTab] = useState<"copilot" | "docs" | "simulator" | "analytics" | "rounds">("copilot");
+  const [activeTab, setActiveTab] = useState<"copilot" | "lab" | "custom_data">("copilot");
   const [isSwitching, setIsSwitching] = useState<boolean>(false);
   const [toasts, setToasts] = useState<TelemetryEvent[]>([]);
 
@@ -60,7 +59,7 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col font-mono text-[#151413]">
+    <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#181716]">
       <Header
         currentIdentity={currentIdentity}
         flagsEval={flagsEval}
@@ -70,64 +69,59 @@ export default function Home() {
         isSwitching={isSwitching}
       />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-3.5 space-y-3">
-        {/* Router Status Strip */}
-        <div className="flex flex-wrap items-center justify-between gap-2 px-3 py-1 bg-[#EDEAE1] border border-[#151413] text-[10px] text-[#7A756D]">
-          <div className="flex items-center gap-2">
-            <span className="font-bold text-[#151413]">&gt; ROUTER: MULTIVARIATE</span>
-            <span>|</span>
-            <span>SPLIT: <strong className="text-[#151413]">33/33/34</strong></span>
-            <span>|</span>
-            <span>CACHE: <strong className="text-[#059669]">ON</strong></span>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span>METRIC: <strong className="text-[#059669]">answer_resolved</strong></span>
-          </div>
-        </div>
-
-        {/* Dynamic Views */}
+      <main className="flex-1 max-w-6xl w-full mx-auto px-4 lg:px-8 py-6 space-y-6">
+        {/* Active Tab View */}
         {activeTab === "copilot" && (
           <CopilotSandbox currentIdentity={currentIdentity} onEventTracked={addToast} />
         )}
 
-        {activeTab === "docs" && <CustomDocsManager />}
+        {activeTab === "lab" && (
+          <div className="space-y-6">
+            <div className="text-center max-w-2xl mx-auto pt-2 pb-1 space-y-2">
+              <h1 className="font-serif-display text-3xl sm:text-4xl font-bold tracking-tight text-[#181716]">
+                Experimentation Lab &amp; Rollout
+              </h1>
+              <p className="text-sm text-[#6B665E]">
+                Simulate large developer swarms, compute{" "}
+                <span className="highlighter-brush font-medium text-[#181716]">Bayesian posterior probability</span>, and promote winners with 1 click.
+              </p>
+            </div>
 
-        {activeTab === "simulator" && (
-          <SwarmSimulator
-            onSwarmCompleted={() => {
-              addToast({
-                id: Math.random().toString(),
-                event: "EVENT_TRACKED",
-                identifier: "swarm_worker",
-                metric: "1500_identities_ingested",
-                value: 263,
-                latency_ms: 1080,
-                timestamp: Date.now() / 1000
-              });
-            }}
-            onEventTracked={addToast}
-          />
+            <div className="grid grid-cols-1 gap-6">
+              <SwarmSimulator
+                onSwarmCompleted={() => {
+                  addToast({
+                    id: Math.random().toString(),
+                    event: "EVENT_TRACKED",
+                    identifier: "swarm_worker",
+                    metric: "1500_identities_ingested",
+                    value: 263,
+                    latency_ms: 1080,
+                    timestamp: Date.now() / 1000
+                  });
+                }}
+                onEventTracked={addToast}
+              />
+
+              <BayesianAnalytics
+                onWinnerPromoted={() => {
+                  loadIdentityFlags(currentIdentity);
+                }}
+                onEventTracked={addToast}
+              />
+            </div>
+          </div>
         )}
 
-        {activeTab === "analytics" && (
-          <BayesianAnalytics
-            onWinnerPromoted={() => {
-              loadIdentityFlags(currentIdentity);
-            }}
-            onEventTracked={addToast}
-          />
-        )}
-
-        {activeTab === "rounds" && <RoundNavigator />}
+        {activeTab === "custom_data" && <CustomDocsManager />}
       </main>
 
       <ToastStream events={toasts} onDismiss={dismissToast} />
 
-      <footer className="border-t-[1.5px] border-[#151413] py-1 px-4 text-center text-[9px] text-[#7A756D] bg-[#EDEAE1]">
-        <div className="max-w-7xl mx-auto flex items-center justify-between">
-          <span>ROUTESMITH AI // RAG MULTIVARIATE GATEWAY</span>
-          <span>STATUS: ONLINE</span>
+      <footer className="border-t border-[#E7E3DA] py-4 px-4 text-xs text-[#9C968B] bg-[#FAF8F5]">
+        <div className="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+          <span>RouteSmith AI — Flagsmith Multivariate RAG Gateway</span>
+          <span className="font-mono-code text-[11px]">System Status: Operational</span>
         </div>
       </footer>
     </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import { CheckCircle2, TrendingUp, SlidersHorizontal, ArrowRight } from "lucide-react";
 import { BayesianReport } from "@/lib/types";
 import { fetchBayesianStats, promoteWinner } from "@/lib/api";
 
@@ -51,8 +52,8 @@ export const BayesianAnalytics: React.FC<BayesianAnalyticsProps> = ({ onWinnerPr
 
   if (!report) {
     return (
-      <div className="pixel-box p-6 text-center text-xs text-[#7A756D] font-mono">
-        &gt; LOADING BAYESIAN INFERENCE TELEMETRY...
+      <div className="clean-card p-8 text-center text-xs text-[#6B665E]">
+        Calculating Bayesian posterior inference over MCMC distributions...
       </div>
     );
   }
@@ -61,9 +62,9 @@ export const BayesianAnalytics: React.FC<BayesianAnalyticsProps> = ({ onWinnerPr
   const varB = report.variants.clustered_hybrid_rag;
   const varC = report.variants.agentic_self_reflection;
 
-  const chartWidth = 700;
+  const chartWidth = 720;
   const chartHeight = 160;
-  const padding = 25;
+  const padding = 30;
 
   const points = report.curve_points || [];
   const maxDensity = Math.max(
@@ -83,102 +84,130 @@ export const BayesianAnalytics: React.FC<BayesianAnalyticsProps> = ({ onWinnerPr
   };
 
   return (
-    <div className="pixel-box p-4 space-y-3 font-mono select-none">
-      {/* Top Header */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 border-b border-[#D3CDC1] pb-2.5">
+    <div className="clean-card p-6 space-y-5">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pb-4 border-b border-[#E7E3DA]">
         <div>
-          <span className="text-[10px] text-[#7A756D]">BAYESIAN INFERENCE // 50,000 MCMC DRAWS</span>
-          <div className="text-xs font-bold text-[#151413]">
-            POSTERIOR CONVERGENCE: BETA(alpha + conv, beta + exp - conv)
-          </div>
+          <h2 className="text-base font-semibold text-[#181716] flex items-center gap-2">
+            <TrendingUp className="w-4 h-4 text-[#059669]" />
+            <span>Bayesian Posterior Telemetry</span>
+          </h2>
+          <p className="text-xs text-[#6B665E] mt-0.5">
+            50,000 Monte Carlo draws across Beta posterior conjugate distributions.
+          </p>
         </div>
 
-        <div className="p-1.5 bg-[#EDEAE1] border border-[#151413] text-right">
-          <span className="text-[10px] text-[#7A756D]">WIN PROB: </span>
-          <span className="text-base font-bold text-[#059669]">{report.winner_win_probability_pct}%</span>
-          <span className="text-[10px] text-[#059669] ml-2 font-bold">+{report.relative_lift_pct}% LIFT</span>
+        <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0]">
+          <span className="text-xs text-[#065F46] font-medium">Win Probability:</span>
+          <span className="text-sm font-bold text-[#059669]">{report.winner_win_probability_pct}%</span>
+          <span className="text-xs text-[#059669] font-medium">+{report.relative_lift_pct}% Lift</span>
         </div>
       </div>
 
       {/* 3 Metric Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-2 text-[11px]">
-        <div className="p-2.5 bg-[#EDEAE1] border border-[#D3CDC1]">
-          <div className="flex justify-between text-[10px] text-[#7A756D]">
-            <span>VAR A</span>
-            <span>fast_zero_shot</span>
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+        {/* Variant A */}
+        <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E7E3DA] space-y-1">
+          <div className="flex items-center justify-between text-xs text-[#6B665E]">
+            <span>Variant A</span>
+            <span className="keycap-tag">Fast Zero-Shot</span>
           </div>
-          <div className="text-lg font-bold text-[#151413] mt-0.5">{varA.observed_conversion_rate}%</div>
-          <div className="text-[10px] text-[#7A756D]">{varA.conversions} / {varA.exposures} | ~540ms</div>
-          <div className="text-[10px] text-[#D97706] mt-1 font-bold">WIN: {varA.win_probability_pct || 0.1}%</div>
+          <div className="text-2xl font-bold text-[#181716]">{varA.observed_conversion_rate}%</div>
+          <div className="text-xs text-[#9C968B]">{varA.conversions} / {varA.exposures} converted (~540ms)</div>
+          <div className="text-xs font-medium text-[#D97706] pt-1">
+            P(Winner): {varA.win_probability_pct || 0.1}%
+          </div>
         </div>
 
-        <div className="p-2.5 bg-white border-2 border-[#059669] shadow-[1.5px_1.5px_0px_#059669]">
-          <div className="flex justify-between text-[10px] text-[#059669] font-bold">
-            <span>VAR B [WINNER]</span>
-            <span>clustered_hybrid</span>
+        {/* Variant B */}
+        <div className="p-4 rounded-xl bg-[#FFFFFF] border-2 border-[#059669] shadow-xs space-y-1">
+          <div className="flex items-center justify-between text-xs text-[#059669] font-semibold">
+            <span>Variant B (Dominant)</span>
+            <span className="px-2 py-0.5 rounded-full bg-[#ECFDF5] border border-[#A7F3D0] text-[10px]">Winner</span>
           </div>
-          <div className="text-lg font-bold text-[#059669] mt-0.5">{varB.observed_conversion_rate}%</div>
-          <div className="text-[10px] text-[#059669]">{varB.conversions} / {varB.exposures} | ~1080ms</div>
-          <div className="text-[10px] text-[#059669] mt-1 font-bold">WIN: {varB.win_probability_pct || 97.4}%</div>
+          <div className="text-2xl font-bold text-[#059669]">{varB.observed_conversion_rate}%</div>
+          <div className="text-xs text-[#059669]">{varB.conversions} / {varB.exposures} converted (~1080ms)</div>
+          <div className="text-xs font-semibold text-[#059669] pt-1">
+            P(Winner): {varB.win_probability_pct || 97.4}%
+          </div>
         </div>
 
-        <div className="p-2.5 bg-[#EDEAE1] border border-[#D3CDC1]">
-          <div className="flex justify-between text-[10px] text-[#7A756D]">
-            <span>VAR C</span>
-            <span>agentic_cot</span>
+        {/* Variant C */}
+        <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E7E3DA] space-y-1">
+          <div className="flex items-center justify-between text-xs text-[#6B665E]">
+            <span>Variant C</span>
+            <span className="keycap-tag">Agentic CoT</span>
           </div>
-          <div className="text-lg font-bold text-[#151413] mt-0.5">{varC.observed_conversion_rate}%</div>
-          <div className="text-[10px] text-[#7A756D]">{varC.conversions} / {varC.exposures} | ~2810ms</div>
-          <div className="text-[10px] text-[#7C3AED] mt-1 font-bold">WIN: {varC.win_probability_pct || 2.5}%</div>
+          <div className="text-2xl font-bold text-[#181716]">{varC.observed_conversion_rate}%</div>
+          <div className="text-xs text-[#9C968B]">{varC.conversions} / {varC.exposures} converted (~2810ms)</div>
+          <div className="text-xs font-medium text-[#7C3AED] pt-1">
+            P(Winner): {varC.win_probability_pct || 2.5}%
+          </div>
         </div>
       </div>
 
-      {/* SVG Curve */}
-      <div className="p-2.5 bg-[#151413] border border-[#151413] space-y-1">
-        <div className="flex justify-between text-[9px] text-[#7A756D] border-b border-[#333] pb-1">
-          <span>POSTERIOR DENSITY CURVES</span>
-          <div className="flex gap-3">
-            <span className="text-[#D97706]">VAR A (11.2%)</span>
-            <span className="text-[#10B981] font-bold">VAR B (24.8%)</span>
-            <span className="text-[#8B5CF6]">VAR C (16.5%)</span>
+      {/* Posterior Curve */}
+      <div className="p-4 rounded-xl bg-[#181716] space-y-2 shadow-inner">
+        <div className="flex items-center justify-between text-xs font-mono-code text-[#9C968B] border-b border-[#2D2A26] pb-2">
+          <span>Posterior Probability Density</span>
+          <div className="flex items-center gap-3 text-[11px]">
+            <span className="text-[#FBBF24]">Variant A (11.2%)</span>
+            <span className="text-[#34D399] font-semibold">Variant B (24.8%)</span>
+            <span className="text-[#C084FC]">Variant C (16.5%)</span>
           </div>
         </div>
 
-        <div className="w-full overflow-x-auto">
+        <div className="w-full overflow-x-auto py-1">
           <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} className="w-full h-36 select-none">
             {[5, 10, 15, 20, 25, 30, 35].map((pct) => {
               const x = padding + ((pct - 4) / 32) * (chartWidth - 2 * padding);
               return (
                 <g key={pct}>
-                  <line x1={x} y1={padding} x2={x} y2={chartHeight - padding} stroke="#2A2926" strokeDasharray="2 2" />
-                  <text x={x} y={chartHeight - padding + 10} fontSize="8" fill="#7A756D" fontFamily="monospace" textAnchor="middle">
+                  <line x1={x} y1={padding} x2={x} y2={chartHeight - padding} stroke="#2D2A26" strokeDasharray="3 3" />
+                  <text x={x} y={chartHeight - padding + 12} fontSize="9" fill="#9C968B" fontFamily="monospace" textAnchor="middle">
                     {pct}%
                   </text>
                 </g>
               );
             })}
-            <line x1={padding} y1={chartHeight - padding} x2={chartWidth - padding} y2={chartHeight - padding} stroke="#444" strokeWidth="1" />
-            <path d={getSvgPath("fast_zero_shot")} fill="none" stroke="#D97706" strokeWidth="1.5" />
-            <path d={getSvgPath("agentic_self_reflection")} fill="none" stroke="#8B5CF6" strokeWidth="1.5" />
-            <path d={getSvgPath("clustered_hybrid_rag")} fill="none" stroke="#10B981" strokeWidth="2.5" />
+            <line x1={padding} y1={chartHeight - padding} x2={chartWidth - padding} y2={chartHeight - padding} stroke="#3D3A36" strokeWidth="1" />
+            <path d={getSvgPath("fast_zero_shot")} fill="none" stroke="#FBBF24" strokeWidth="1.5" />
+            <path d={getSvgPath("agentic_self_reflection")} fill="none" stroke="#C084FC" strokeWidth="1.5" />
+            <path d={getSvgPath("clustered_hybrid_rag")} fill="none" stroke="#34D399" strokeWidth="2.5" />
           </svg>
         </div>
       </div>
 
-      {/* 1-Click Rollout */}
-      <div className="p-2.5 bg-[#EDEAE1] border border-[#151413] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
-        <div className="text-[11px] font-bold text-[#151413]">
-          ROLLOUT // SHIFT SPLIT FROM 33/33/34 TO 0/100/0 VIA ADMIN API
+      {/* 1-Click Rollout Banner */}
+      <div className="p-4 rounded-xl bg-[#FAF8F5] border border-[#E7E3DA] flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        <div>
+          <div className="text-xs font-semibold text-[#181716] flex items-center gap-1.5">
+            <SlidersHorizontal className="w-3.5 h-3.5 text-[#059669]" />
+            <span>Automated Production Rollout</span>
+          </div>
+          <p className="text-xs text-[#6B665E] mt-0.5">
+            Shift multivariate traffic from 33/33/34 to 100% Variant B in Flagsmith remote config.
+          </p>
         </div>
 
         <button
           onClick={handlePromote}
           disabled={isPromoting || promotedSuccess}
-          className={`pixel-btn-emerald py-1 px-3 text-xs font-bold ${
+          className={`tactile-btn tactile-btn-emerald py-2 px-5 text-xs font-semibold flex items-center gap-1.5 ${
             promotedSuccess ? "bg-[#065F46] cursor-default" : ""
           }`}
         >
-          {isPromoting ? "UPDATING..." : promotedSuccess ? "100% PROD ACTIVE" : "PROMOTE WINNER (VAR B)"}
+          {promotedSuccess ? (
+            <>
+              <CheckCircle2 className="w-4 h-4" />
+              <span>100% Production Active</span>
+            </>
+          ) : (
+            <>
+              <span>{isPromoting ? "Deploying..." : "Promote Variant B (100%)"}</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </>
+          )}
         </button>
       </div>
     </div>

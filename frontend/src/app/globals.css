@@ -1,158 +1,178 @@
 @import "tailwindcss";
 
 :root {
-  --bg-canvas: #F6F4EE;
-  --bg-surface: #EDEAE1;
+  --bg-canvas: #FAF8F5;
+  --bg-surface: #F3EFE8;
   --bg-card: #FFFFFF;
-  --border-hairline: #D3CDC1;
-  --border-strong: #171615;
-  --ink-primary: #151413;
-  --ink-muted: #7A756D;
-  --ink-subtle: #A39E94;
+  --border-card: #E7E3DA;
+  --border-subtle: #EFECE6;
+  --ink-primary: #181716;
+  --ink-secondary: #6B665E;
+  --ink-muted: #9C968B;
 
   --accent-emerald: #059669;
-  --accent-amber: #D97706;
+  --accent-emerald-bg: #ECFDF5;
+  --accent-emerald-border: #A7F3D0;
+  
   --accent-blue: #2563EB;
-  --accent-purple: #7C3AED;
-  --accent-red: #DC2626;
+  --accent-blue-bg: #EFF6FF;
+  --accent-blue-border: #BFDBFE;
 
-  --font-mono: "JetBrains Mono", "Geist Mono", "SF Mono", Menlo, Consolas, monospace;
+  --accent-amber: #D97706;
+  --accent-amber-bg: #FFFBEB;
+  --accent-amber-border: #FDE68A;
+
+  --accent-purple: #7C3AED;
+  --accent-purple-bg: #FAF5FF;
+  --accent-purple-border: #E9D5FF;
+
+  --font-serif: "Newsreader", Charter, Cambria, Georgia, serif;
+  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
 }
 
 body {
   background-color: var(--bg-canvas);
   color: var(--ink-primary);
-  font-family: var(--font-mono);
-  background-image: radial-gradient(#D8D2C6 1px, transparent 1px);
-  background-size: 18px 18px;
+  font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Pixel / Neo-Tactile Micro Buttons */
-.pixel-btn {
+.font-serif-display {
+  font-family: var(--font-serif);
+}
+
+.font-mono-code {
   font-family: var(--font-mono);
-  font-size: 11px;
-  font-weight: 600;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 6px 12px;
-  background: #FFFFFF;
-  color: #151413;
-  border: 1.5px solid #151413;
-  box-shadow: 2px 2px 0px #151413;
-  transition: all 0.06s ease-in-out;
+}
+
+/* Organic Highlighter Brush Accent */
+.highlighter-brush {
+  position: relative;
+  display: inline-block;
+  white-space: nowrap;
+}
+
+.highlighter-brush::before {
+  content: "";
+  position: absolute;
+  left: -4px;
+  right: -4px;
+  bottom: 4px;
+  height: 48%;
+  background-color: #FEF08A;
+  z-index: -1;
+  transform: rotate(-1deg);
+  border-radius: 4px;
+}
+
+/* Tactile Pill Button */
+.tactile-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-sans);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 6px 14px;
+  border-radius: 9999px;
+  border: 1px solid var(--border-card);
+  background-color: #FFFFFF;
+  color: var(--ink-primary);
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
+  transition: all 0.15s ease;
   cursor: pointer;
 }
 
-.pixel-btn:hover {
-  background: #FAF9F5;
-  transform: translate(-0.5px, -0.5px);
-  box-shadow: 2.5px 2.5px 0px #151413;
+.tactile-btn:hover {
+  background-color: #F8F6F1;
+  border-color: #D3CDC1;
+  transform: translateY(-0.5px);
 }
 
-.pixel-btn:active {
-  transform: translate(1.5px, 1.5px);
-  box-shadow: 0.5px 0.5px 0px #151413;
+.tactile-btn:active {
+  transform: translateY(0.5px);
+  box-shadow: none;
 }
 
-.pixel-btn-primary {
-  background: #151413;
-  color: #F6F4EE;
-  border: 1.5px solid #151413;
-  box-shadow: 2px 2px 0px #059669;
+.tactile-btn-primary {
+  background-color: #181716;
+  color: #FAF8F5;
+  border-color: #181716;
 }
 
-.pixel-btn-primary:hover {
-  background: #252422;
-  box-shadow: 2.5px 2.5px 0px #059669;
-}
-
-.pixel-btn-primary:active {
-  transform: translate(1.5px, 1.5px);
-  box-shadow: 0.5px 0.5px 0px #059669;
-}
-
-.pixel-btn-emerald {
-  background: #059669;
+.tactile-btn-primary:hover {
+  background-color: #2D2A26;
   color: #FFFFFF;
-  border: 1.5px solid #151413;
-  box-shadow: 2px 2px 0px #151413;
 }
 
-.pixel-btn-emerald:hover {
-  background: #047857;
+.tactile-btn-emerald {
+  background-color: #059669;
+  color: #FFFFFF;
+  border-color: #059669;
 }
 
-/* Inset Hardware Container */
-.pixel-box {
-  background: #FFFFFF;
-  border: 1.5px solid #151413;
-  box-shadow: 3px 3px 0px #151413;
+.tactile-btn-emerald:hover {
+  background-color: #047857;
 }
 
-.pixel-box-subtle {
-  background: #EDEAE1;
-  border: 1.5px solid #D3CDC1;
+/* Card Container */
+.clean-card {
+  background-color: #FFFFFF;
+  border: 1px solid var(--border-card);
+  border-radius: 16px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02), 0 1px 2px rgba(0, 0, 0, 0.03);
 }
 
-/* Hardware LED */
-.led-indicator {
-  width: 7px;
-  height: 7px;
-  border-radius: 1px;
-  display: inline-block;
+/* Keycap Tag */
+.keycap-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1px 6px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--ink-secondary);
+  background-color: #F3EFE8;
+  border: 1px solid #DCD7CE;
+  border-bottom: 2px solid #C9C3B8;
+  border-radius: 5px;
 }
 
-.led-green {
-  background: #10B981;
-  box-shadow: 0 0 6px #10B981;
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #D3CDC1;
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #B8B0A2;
 }
 
-.led-amber {
-  background: #F59E0B;
-  box-shadow: 0 0 6px #F59E0B;
-}
-
-.led-blue {
-  background: #3B82F6;
-  box-shadow: 0 0 6px #3B82F6;
-}
-
-/* Dot Matrix Grid for 1,500 simulated identities */
+/* Dot Matrix Grid */
 .dot-matrix {
   display: grid;
-  grid-template-columns: repeat(50, minmax(0, 1fr));
+  grid-template-columns: repeat(25, minmax(0, 1fr));
   gap: 2.5px;
 }
 
+@media (min-width: 640px) {
+  .dot-matrix {
+    grid-template-columns: repeat(50, minmax(0, 1fr));
+  }
+}
+
 .dot-unit {
-  width: 5.5px;
-  height: 5.5px;
-  border-radius: 0.5px;
+  width: 100%;
+  aspect-ratio: 1;
+  border-radius: 2px;
   transition: background-color 0.15s ease;
 }
 
-/* Monospace Ticker */
-.ticker-badge {
-  font-family: var(--font-mono);
-  font-size: 10px;
-  padding: 2px 6px;
-  border: 1px solid #151413;
-  background: #FFFFFF;
-  color: #151413;
-  font-weight: 500;
-  text-transform: uppercase;
-}
-
-/* Custom Minimal Scrollbar */
-::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
-}
-::-webkit-scrollbar-track {
-  background: #EDEAE1;
-}
-::-webkit-scrollbar-thumb {
-  background: #151413;
-}
