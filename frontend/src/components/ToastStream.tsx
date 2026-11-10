@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Activity, CheckCircle2, Shield, X } from "lucide-react";
+import { Activity, CheckCircle2, X } from "lucide-react";
 import { TelemetryEvent } from "@/lib/types";
 
 interface ToastStreamProps {
@@ -13,51 +13,39 @@ export const ToastStream: React.FC<ToastStreamProps> = ({ events, onDismiss }) =
   if (events.length === 0) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm pointer-events-none select-none">
+    <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-1.5 max-w-sm pointer-events-none select-none font-mono">
       {events.map((ev) => {
         const isExposure = ev.event === "EXPOSURE";
         return (
           <div
             key={ev.id}
-            className="pointer-events-auto bg-[#181715] text-[#FAF8F5] p-3.5 rounded-xl border border-[#333] shadow-lg animate-in slide-in-from-bottom-3 duration-200 text-xs font-mono-code space-y-1.5"
+            className="pointer-events-auto bg-[#151413] text-[#F6F4EE] p-2.5 border border-[#151413] shadow-[3px_3px_0px_#059669] text-[10px] space-y-1"
           >
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-1.5">
-                {isExposure ? (
-                  <Activity className="w-3.5 h-3.5 text-[#2563EB]" />
-                ) : (
-                  <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
-                )}
-                <span className="font-bold tracking-wider text-[11px] text-[#FEF08A]">
-                  FLAGSMITH {ev.event}
-                </span>
-              </div>
+            <div className="flex items-center justify-between border-b border-[#333] pb-1">
+              <span className="font-bold text-[#A7F3D0]">
+                FLAGSMITH // {ev.event}
+              </span>
               <button
                 onClick={() => onDismiss(ev.id)}
-                className="text-[#8E887E] hover:text-white"
-                aria-label="Dismiss toast"
+                className="text-[#7A756D] hover:text-white"
+                aria-label="Dismiss"
               >
-                <X className="w-3.5 h-3.5" />
+                <X className="w-3 h-3" />
               </button>
             </div>
 
-            <div className="text-[#E2E8F0] text-[11px] leading-relaxed">
+            <div className="text-[#EDEAE1] leading-tight">
               {isExposure ? (
                 <>
-                  Identity <span className="text-white font-semibold">{ev.identifier}</span> evaluated{" "}
-                  <span className="text-[#93C5FD]">rag_pipeline_strategy</span> -&gt;{" "}
-                  <span className="text-[#FEF08A] font-semibold">{ev.variant}</span>
+                  ID <strong className="text-white">{ev.identifier}</strong> -&gt;{" "}
+                  <strong className="text-[#FEF08A]">{ev.variant}</strong>
                 </>
               ) : (
                 <>
-                  metric=&quot;<span className="text-[#A7F3D0]">{ev.metric || "answer_resolved"}</span>&quot; |
-                  value={ev.value || 1} | latency_ms={ev.latency_ms || 1080}
+                  EVENT=&quot;<strong className="text-[#A7F3D0]">{ev.metric || "answer_resolved"}</strong>&quot; |
+                  VAL={ev.value || 1} | {ev.latency_ms || 1080}ms
                 </>
               )}
-            </div>
-
-            <div className="text-[10px] text-[#8E887E] text-right">
-              {new Date(ev.timestamp * 1000).toLocaleTimeString()}
             </div>
           </div>
         );
@@ -65,4 +53,3 @@ export const ToastStream: React.FC<ToastStreamProps> = ({ events, onDismiss }) =
     </div>
   );
 };
-

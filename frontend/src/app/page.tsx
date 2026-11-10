@@ -27,7 +27,6 @@ export default function Home() {
       const evaluation = await fetchFlags(userId);
       setFlagsEval(evaluation);
 
-      // Trigger exposure toast
       addToast({
         id: Math.random().toString(),
         event: "EXPOSURE",
@@ -52,7 +51,7 @@ export default function Home() {
     setToasts((prev) => [event, ...prev.slice(0, 3)]);
     setTimeout(() => {
       dismissToast(event.id);
-    }, 5500);
+    }, 4500);
   };
 
   const dismissToast = (id: string) => {
@@ -60,8 +59,8 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-[#FAF8F5] text-[#181715]">
-      {/* Tactile Header with Identity HUD */}
+    <div className="min-h-screen flex flex-col font-mono text-[#151413]">
+      {/* Header Deck */}
       <Header
         currentIdentity={currentIdentity}
         flagsEval={flagsEval}
@@ -71,41 +70,28 @@ export default function Home() {
         isSwitching={isSwitching}
       />
 
-      {/* Main Container */}
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-8 space-y-8">
-        {/* Editorial Hero Banner (LocalFlow style) */}
-        <section className="text-center max-w-3xl mx-auto space-y-4 pt-4">
-          <div className="inline-flex items-center gap-2 text-xs font-mono-code text-[#6B665E]">
-            <span className="w-2 h-2 rounded-full bg-[#E04F34]"></span>
-            <span>YOUR DOCS. YOUR ROUTER. YOUR CODE.</span>
+      {/* Main Body */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-8 py-5 space-y-4">
+        {/* Compact System Strip */}
+        <div className="flex flex-wrap items-center justify-between gap-2 p-2.5 bg-[#EDEAE1] border border-[#151413] text-[10px] text-[#7A756D]">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-[#151413]">&gt; ROUTER_MODE: MULTIVARIATE</span>
+            <span>|</span>
+            <span>CACHE: <strong className="text-[#059669]">ENABLED</strong></span>
+            <span>|</span>
+            <span>MAX_TOKENS: <strong className="text-[#151413]">2048</strong></span>
           </div>
 
-          <h1 className="font-serif-display text-4xl sm:text-5xl md:text-6xl font-bold tracking-tight text-[#181715] leading-[1.15]">
-            Think it. Ask it.{" "}
-            <span className="highlighter-brush italic font-normal">There it is.</span>
-          </h1>
-
-          <p className="text-base sm:text-lg text-[#6B665E] max-w-2xl mx-auto leading-relaxed">
-            A self-optimizing LLM gateway that tests which RAG topology maximizes developer code resolution.
-            Powered by Flagsmith multivariate flags and Bayesian Beta-Binomial convergence.
-          </p>
-
-          <div className="flex flex-wrap items-center justify-center gap-2 pt-2 text-xs font-mono-code text-[#6B665E]">
-            <span className="keycap-badge">fn</span>
-            <span>or</span>
-            <span className="keycap-badge">right ⌥</span>
-            <span>Hold. Query. Resolve.</span>
-            <span className="text-[#D5CEC4]">/</span>
-            <span>Zero AI Slop. 100% Bayesian Confidence.</span>
+          <div className="flex items-center gap-3">
+            <span>SPLIT: <strong className="text-[#151413]">33 / 33 / 34</strong></span>
+            <span>|</span>
+            <span>METRIC: <strong className="text-[#059669]">answer_resolved</strong></span>
           </div>
-        </section>
+        </div>
 
-        {/* Tab View Switching */}
+        {/* View Switching */}
         {activeTab === "copilot" && (
-          <CopilotSandbox
-            currentIdentity={currentIdentity}
-            onEventTracked={addToast}
-          />
+          <CopilotSandbox currentIdentity={currentIdentity} onEventTracked={addToast} />
         )}
 
         {activeTab === "rounds" && <RoundNavigator />}
@@ -137,15 +123,15 @@ export default function Home() {
         )}
       </main>
 
-      {/* Real-time Telemetry Toast Stream in bottom-right */}
+      {/* Real-time Telemetry Toast Stream */}
       <ToastStream events={toasts} onDismiss={dismissToast} />
 
-      {/* Footer */}
-      <footer className="border-t border-[#E7E2D9] py-6 text-center text-xs font-mono-code text-[#8E887E] bg-[#FAF8F5]">
-        <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-          <span>RouteSmith AI - Flagsmith Hackathon Track 01</span>
-          <span>FastAPI Backend + Next.js 15 App Router</span>
-          <span>MIT License</span>
+      {/* Compact Status Footer */}
+      <footer className="border-t-[1.5px] border-[#151413] py-2 px-4 text-center text-[10px] text-[#7A756D] bg-[#EDEAE1]">
+        <div className="max-w-7xl mx-auto flex items-center justify-between">
+          <span>ROUTESMITH AI // FLAGSMITH TRACK 01</span>
+          <span>FASTAPI + NEXT.JS // ZERO AI SLOP</span>
+          <span>ONLINE</span>
         </div>
       </footer>
     </div>

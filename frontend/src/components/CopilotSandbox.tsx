@@ -1,8 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { Copy, Check, Play, Send, CheckCircle2, AlertTriangle, Terminal, Clock, DollarSign } from "lucide-react";
-import { ChatResponse, VariantType } from "@/lib/types";
+import { Copy, Check, Play, Send, Terminal, Clock, DollarSign, CheckCircle2, AlertCircle } from "lucide-react";
+import { ChatResponse } from "@/lib/types";
 import { askCopilot, trackConversion } from "@/lib/api";
 
 interface CopilotSandboxProps {
@@ -10,15 +10,15 @@ interface CopilotSandboxProps {
   onEventTracked: (event: any) => void;
 }
 
-const SAMPLE_QUERIES = [
-  "How do I initialize Flagsmith Python SDK with async FastAPI?",
-  "How does deterministic multivariate flag routing work in RAG?",
-  "How do I track custom conversion events with Flagsmith analytics?",
-  "How do I enforce token budget remote config without redeployment?"
+const PRESET_QUERIES = [
+  { label: "FASTAPI + SDK", query: "How do I initialize Flagsmith Python SDK with async FastAPI?" },
+  { label: "MULTIVARIATE ROUTING", query: "How does deterministic multivariate flag routing work in RAG?" },
+  { label: "CONVERSION EVENT", query: "How do I track custom conversion events with Flagsmith analytics?" },
+  { label: "TOKEN CONFIG", query: "How do I enforce token budget remote config without redeployment?" }
 ];
 
 export const CopilotSandbox: React.FC<CopilotSandboxProps> = ({ currentIdentity, onEventTracked }) => {
-  const [query, setQuery] = useState(SAMPLE_QUERIES[0]);
+  const [query, setQuery] = useState(PRESET_QUERIES[0].query);
   const [isLoading, setIsLoading] = useState(false);
   const [response, setResponse] = useState<ChatResponse | null>(null);
   const [copied, setCopied] = useState(false);
@@ -38,7 +38,6 @@ export const CopilotSandbox: React.FC<CopilotSandboxProps> = ({ currentIdentity,
     try {
       const res = await askCopilot(currentIdentity, query);
       setResponse(res);
-      // Start 30s negative guardrail timer
       setGuardrailSeconds(30);
       const interval = setInterval(() => {
         setGuardrailSeconds((prev) => {
@@ -60,9 +59,8 @@ export const CopilotSandbox: React.FC<CopilotSandboxProps> = ({ currentIdentity,
     if (!response?.code) return;
     await navigator.clipboard.writeText(response.code);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 1500);
 
-    // Track answer_resolved event
     const eventResult = await trackConversion(
       currentIdentity,
       response.active_variant,
@@ -76,15 +74,14 @@ export const CopilotSandbox: React.FC<CopilotSandboxProps> = ({ currentIdentity,
   const handleRunSandbox = async () => {
     if (!response?.code) return;
     setIsRunningSandbox(true);
-    setSandboxOutput("Initializing isolated Python 3.11 execution runtime...\nLoading Flagsmith SDK context...");
+    setSandboxOutput(">> MOUNTING ISOLATED RUNTIME...\n>> INJECTING IDENTITY CONTEXT: " + currentIdentity);
 
     setTimeout(async () => {
       setIsRunningSandbox(false);
       setSandboxOutput(
-        `[SUCCESS] Python script executed cleanly.\nFlagsmith client initialized: identifier='${currentIdentity}'\nActive Variant: '${response.active_variant}'\nToken latency: ${response.latency_ms}ms\nSandbox return code: 0`
+        `>> STATUS: 0 (SUCCESS)\n>> EXECUTED PIPELINE: ${response.active_variant.toUpperCase()}\n>> DURATION: ${response.latency_ms}ms\n>> TOKEN_COST: $${response.cost_usd.toFixed(4)}\n>> FLAGSMITH_EVENT: answer_resolved EMITTED`
       );
 
-      // Track answer_resolved event
       const eventResult = await trackConversion(
         currentIdentity,
         response.active_variant,
@@ -93,7 +90,7 @@ export const CopilotSandbox: React.FC<CopilotSandboxProps> = ({ currentIdentity,
       );
       onEventTracked(eventResult.event);
       setIsResolved(true);
-    }, 850);
+    }, 600);
   };
 
   const handleMarkResolved = async () => {
@@ -109,175 +106,159 @@ export const CopilotSandbox: React.FC<CopilotSandboxProps> = ({ currentIdentity,
   };
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-      {/* Left Column: Copilot Query & Solution Area */}
-      <div className="lg:col-span-7 space-y-6">
-        {/* Editorial Header */}
-        <div className="bg-white rounded-2xl border border-[#E7E2D9] p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-mono-code text-[#8E887E]">
-              Autonomous Docs Copilot
-            </span>
-            <span className="keycap-badge text-[10px]">SDK Gateway Ingress</span>
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 font-mono select-none">
+      {/* Left: Input & Pipeline Result */}
+      <div className="lg:col-span-7 space-y-4">
+        {/* Compact Terminal Query Bar */}
+        <div className="pixel-box p-4 space-y-3">
+          <div className="flex items-center justify-between text-[11px] text-[#7A756D] border-b border-[#D3CDC1] pb-2">
+            <span className="font-bold text-[#151413]">DOCS_INGRESS // QUERY DISPATCH</span>
+            <span>IDENTIFIER: {currentIdentity}</span>
           </div>
 
-          <h2 className="font-serif-display text-2xl font-bold text-[#181715]">
-            Ask Technical Documentation
-          </h2>
-
-          {/* Preset Prompts */}
-          <div className="flex flex-wrap gap-2 pt-1">
-            {SAMPLE_QUERIES.map((q) => (
+          {/* Preset Buttons */}
+          <div className="flex flex-wrap gap-1.5">
+            {PRESET_QUERIES.map((p) => (
               <button
-                key={q}
-                onClick={() => setQuery(q)}
-                className="text-left text-xs px-3 py-1.5 rounded-lg bg-[#FAF8F5] hover:bg-[#F3EFEA] text-[#6B665E] hover:text-[#181715] border border-[#E7E2D9] transition-all"
+                key={p.label}
+                onClick={() => setQuery(p.query)}
+                className={`text-[10px] px-2 py-1 border transition-all ${
+                  query === p.query
+                    ? "bg-[#151413] text-[#F6F4EE] border-[#151413] font-bold"
+                    : "bg-[#EDEAE1] text-[#7A756D] border-[#D3CDC1] hover:text-[#151413]"
+                }`}
               >
-                {q}
+                [{p.label}]
               </button>
             ))}
           </div>
 
-          {/* Query Input Box */}
-          <form onSubmit={handleSubmit} className="flex gap-2 pt-2">
-            <input
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Ask an SDK or API architecture question..."
-              className="flex-1 px-4 py-2.5 rounded-xl border border-[#D5CEC4] bg-[#FAF8F5] text-sm focus:outline-none focus:ring-2 focus:ring-[#2563EB]/20 focus:border-[#2563EB] font-sans transition-all"
-            />
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="flex gap-2 pt-1">
+            <div className="relative flex-1">
+              <span className="absolute left-3 top-2.5 text-xs text-[#7A756D] font-bold">&gt;</span>
+              <input
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="Enter SDK question..."
+                className="w-full pl-7 pr-3 py-2 text-xs bg-[#EDEAE1] border border-[#151413] text-[#151413] focus:outline-none focus:ring-1 focus:ring-[#151413]"
+              />
+            </div>
             <button
               type="submit"
               disabled={isLoading}
-              className="px-5 py-2.5 rounded-xl bg-[#181715] hover:bg-[#2D2A26] text-white text-sm font-medium flex items-center gap-2 transition-all shadow-xs active:translate-y-px disabled:opacity-50"
+              className="pixel-btn-primary px-4 py-2 text-xs disabled:opacity-50"
             >
-              <Send className="w-4 h-4" />
-              <span>{isLoading ? "Routing..." : "Ask"}</span>
+              {isLoading ? "ROUTING..." : "DISPATCH"}
             </button>
           </form>
         </div>
 
-        {/* Dynamic Response Box */}
-        {response && (
-          <div className="bg-white rounded-2xl border border-[#E7E2D9] p-6 shadow-xs space-y-4 animate-in fade-in duration-300">
-            {/* Variant Metadata Bar */}
-            <div className="flex flex-wrap items-center justify-between gap-3 border-b border-[#E7E2D9] pb-3 text-xs">
+        {/* Response Box */}
+        {response ? (
+          <div className="pixel-box p-4 space-y-3">
+            {/* Telemetry Header */}
+            <div className="flex flex-wrap items-center justify-between gap-2 border-b border-[#D3CDC1] pb-2 text-[11px]">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-[#181715]">{response.pipeline_title}</span>
-                <span className="keycap-badge text-[10px]">{response.active_variant}</span>
+                <span className="ticker-badge bg-[#151413] text-[#F6F4EE]">
+                  {response.active_variant}
+                </span>
+                <span className="font-bold text-[#151413]">{response.pipeline_title}</span>
               </div>
-
-              <div className="flex items-center gap-4 text-[#6B665E] font-mono-code">
-                <span className="flex items-center gap-1">
-                  <Clock className="w-3.5 h-3.5 text-[#2563EB]" />
-                  <span>{response.latency_ms}ms</span>
-                </span>
-                <span className="flex items-center gap-1">
-                  <DollarSign className="w-3.5 h-3.5 text-[#10B981]" />
-                  <span>${response.cost_usd.toFixed(4)}</span>
-                </span>
+              <div className="flex items-center gap-3 text-[10px] text-[#7A756D]">
+                <span>LATENCY: <strong className="text-[#151413]">{response.latency_ms}ms</strong></span>
+                <span>COST: <strong className="text-[#059669]">${response.cost_usd.toFixed(4)}</strong></span>
               </div>
             </div>
 
             {/* Answer Text */}
-            <p className="text-sm text-[#44403C] leading-relaxed">
+            <div className="p-3 bg-[#EDEAE1] border border-[#D3CDC1] text-xs text-[#151413] leading-relaxed">
               {response.answer}
-            </p>
+            </div>
 
+            {/* Warning if any */}
             {response.warning && (
-              <div className="flex items-start gap-2 p-3 rounded-lg bg-amber-50 border border-amber-200 text-xs text-amber-900">
-                <AlertTriangle className="w-4 h-4 shrink-0 text-amber-600 mt-0.5" />
+              <div className="px-3 py-1.5 bg-[#FEF3C7] border border-[#F59E0B] text-[10px] text-[#92400E] flex items-center gap-2">
+                <AlertCircle className="w-3.5 h-3.5 shrink-0" />
                 <span>{response.warning}</span>
               </div>
             )}
 
-            {/* Code Snippet Box */}
-            <div className="rounded-xl bg-[#181715] text-[#FAF8F5] p-4 font-mono-code text-xs relative group">
-              <div className="flex items-center justify-between pb-2 border-b border-[#333] mb-2 text-[#8E887E]">
-                <span>flagsmith_example.py</span>
-                <span className="text-[10px]">Python 3.11</span>
+            {/* Code Block */}
+            <div className="border border-[#151413] bg-[#151413] text-[#F6F4EE] p-3 text-xs overflow-x-auto">
+              <div className="flex items-center justify-between pb-1.5 mb-2 border-b border-[#333] text-[10px] text-[#7A756D]">
+                <span>SOURCE: PYTHON_SDK</span>
+                <span>RETURN: EXECUTABLE</span>
               </div>
-              <pre className="overflow-x-auto text-[#E2E8F0] leading-relaxed">
-                {response.code}
-              </pre>
+              <pre className="text-[#A7F3D0] leading-relaxed">{response.code}</pre>
             </div>
 
-            {/* Action Bar (Conversion Triggers) */}
-            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+            {/* Action Buttons */}
+            <div className="flex flex-wrap items-center justify-between gap-2 pt-1 border-t border-[#D3CDC1]">
               <div className="flex items-center gap-2">
-                <button
-                  onClick={handleCopyCode}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#2563EB] hover:bg-[#1D4ED8] text-white text-xs font-medium transition-all shadow-xs active:translate-y-px"
-                >
-                  {copied ? <Check className="w-3.5 h-3.5" /> : <Copy className="w-3.5 h-3.5" />}
-                  <span>{copied ? "Copied to Clipboard" : "Copy Working Code"}</span>
+                <button onClick={handleCopyCode} className="pixel-btn flex items-center gap-1.5">
+                  {copied ? <Check className="w-3 h-3 text-[#059669]" /> : <Copy className="w-3 h-3" />}
+                  <span>{copied ? "COPIED" : "COPY CODE"}</span>
                 </button>
-
                 <button
                   onClick={handleRunSandbox}
                   disabled={isRunningSandbox}
-                  className="flex items-center gap-1.5 px-3.5 py-2 rounded-lg bg-[#FAF8F5] hover:bg-[#F3EFEA] text-[#181715] border border-[#D5CEC4] text-xs font-medium transition-all shadow-xs"
+                  className="pixel-btn-emerald flex items-center gap-1.5"
                 >
-                  <Play className="w-3.5 h-3.5 text-[#10B981]" />
-                  <span>{isRunningSandbox ? "Executing..." : "Run in Sandbox"}</span>
+                  <Play className="w-3 h-3" />
+                  <span>{isRunningSandbox ? "RUNNING..." : "RUN IN SANDBOX"}</span>
                 </button>
               </div>
 
               <button
                 onClick={handleMarkResolved}
                 disabled={isResolved}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
-                  isResolved
-                    ? "bg-emerald-50 text-emerald-800 border border-emerald-300"
-                    : "text-[#6B665E] hover:text-[#181715] hover:bg-[#FAF8F5] border border-transparent"
+                className={`pixel-btn flex items-center gap-1.5 ${
+                  isResolved ? "bg-[#D1FAE5] text-[#065F46] border-[#059669]" : ""
                 }`}
               >
-                <CheckCircle2 className="w-3.5 h-3.5 text-[#10B981]" />
-                <span>{isResolved ? "Answer Resolved Tracked" : "Mark as Resolved"}</span>
+                <CheckCircle2 className="w-3 h-3" />
+                <span>{isResolved ? "RESOLVED (TRACKED)" : "MARK RESOLVED"}</span>
               </button>
             </div>
 
-            {/* Negative Guardrail Status */}
+            {/* 30s Guardrail Status */}
             {guardrailSeconds !== null && (
-              <div className="text-[11px] font-mono-code text-[#8E887E] bg-[#FAF8F5] p-2 rounded-md border border-[#E7E2D9] flex items-center justify-between">
-                <span>Guardrail window active: {guardrailSeconds}s</span>
-                <span>Conversion suppresses if error prompt submitted</span>
+              <div className="text-[10px] text-[#7A756D] flex justify-between px-2 py-1 bg-[#EDEAE1] border border-[#D3CDC1]">
+                <span>NEGATIVE GUARDRAIL: {guardrailSeconds}s ACTIVE</span>
+                <span>METRIC COMMITS IF NO ERROR FOLLOW-UP</span>
               </div>
             )}
+          </div>
+        ) : (
+          <div className="pixel-box p-8 text-center text-[#7A756D] text-xs">
+            &gt; AWAITING QUERY. SELECT PRESET OR DISPATCH TO OBSERVE MULTIVARIATE RAG EXECUTION.
           </div>
         )}
       </div>
 
-      {/* Right Column: Code Sandbox Runner & Real-time Telemetry */}
-      <div className="lg:col-span-5 space-y-6">
-        <div className="bg-white rounded-2xl border border-[#E7E2D9] p-6 shadow-xs space-y-4">
-          <div className="flex items-center justify-between border-b border-[#E7E2D9] pb-3">
-            <div className="flex items-center gap-2">
-              <Terminal className="w-4 h-4 text-[#2563EB]" />
-              <h3 className="font-semibold text-sm text-[#181715]">Interactive Code Sandbox</h3>
-            </div>
-            <span className="keycap-badge text-[10px]">stdout</span>
+      {/* Right: Sandbox Stdout Console */}
+      <div className="lg:col-span-5 space-y-4">
+        <div className="pixel-box p-4 space-y-3">
+          <div className="flex items-center justify-between border-b border-[#D3CDC1] pb-2 text-[11px]">
+            <span className="font-bold text-[#151413]">STDOUT // SANDBOX RUNNER</span>
+            <span className="ticker-badge">ISOLATED</span>
           </div>
 
-          <p className="text-xs text-[#6B665E] leading-relaxed">
-            Execute generated Flagsmith code snippets in an isolated runtime to test syntax, identity hashing, and trait routing.
-          </p>
-
-          {/* Sandbox Terminal */}
-          <div className="bg-[#181715] rounded-xl p-4 font-mono-code text-xs text-[#A3E635] min-h-[220px] flex flex-col justify-between">
+          <div className="bg-[#151413] text-[#A7F3D0] p-4 text-xs font-mono min-h-[310px] flex flex-col justify-between border border-[#151413]">
             {sandboxOutput ? (
               <pre className="whitespace-pre-wrap leading-relaxed">{sandboxOutput}</pre>
             ) : (
-              <div className="text-[#8E887E] flex flex-col items-center justify-center h-40 space-y-2 text-center">
-                <Terminal className="w-8 h-8 text-[#44403C]" />
-                <span>Click &quot;Run in Sandbox&quot; on the generated code to verify execution live.</span>
+              <div className="text-[#555] flex flex-col items-center justify-center h-48 space-y-2 text-center">
+                <Terminal className="w-8 h-8 text-[#444]" />
+                <span className="text-[11px]">&gt; CLICK &quot;RUN IN SANDBOX&quot; TO TEST GENERATED CODE</span>
               </div>
             )}
 
-            <div className="border-t border-[#333] pt-2 mt-4 text-[11px] text-[#8E887E] flex items-center justify-between">
-              <span>Exit code: {sandboxOutput ? "0" : "--"}</span>
-              <span>Memory: 14.2 MB</span>
+            <div className="border-t border-[#333] pt-2 text-[10px] text-[#7A756D] flex items-center justify-between">
+              <span>MEMORY: 12.4 MB</span>
+              <span>EXIT_CODE: {sandboxOutput ? "0" : "--"}</span>
             </div>
           </div>
         </div>
@@ -285,4 +266,3 @@ export const CopilotSandbox: React.FC<CopilotSandboxProps> = ({ currentIdentity,
     </div>
   );
 };
-

@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { RefreshCw, Shield, Zap, Database } from "lucide-react";
+import { RefreshCw, Terminal, Cpu } from "lucide-react";
 import { FlagsmithEval, VariantType } from "@/lib/types";
 
 interface HeaderProps {
@@ -25,119 +25,106 @@ export const Header: React.FC<HeaderProps> = ({
   const weights = flagsEval?.traffic_weights || { fast_zero_shot: 33, clustered_hybrid_rag: 33, agentic_self_reflection: 34 };
   const isWinnerPromoted = weights.clustered_hybrid_rag === 100;
 
-  const variantLabels: Record<VariantType, { label: string; badge: string; colorClass: string }> = {
-    fast_zero_shot: {
-      label: "Variant A (fast_zero_shot)",
-      badge: "540ms",
-      colorClass: "bg-amber-50 text-amber-900 border-amber-200"
-    },
+  const variantLabels: Record<VariantType, { name: string; latency: string; color: string }> = {
+    fast_zero_shot: { name: "VAR_A: ZERO_SHOT", latency: "540ms", color: "text-[#D97706]" },
     clustered_hybrid_rag: {
-      label: isWinnerPromoted ? "Variant B (100% Production)" : "Variant B (clustered_hybrid_rag)",
-      badge: isWinnerPromoted ? "Winner Locked" : "1080ms",
-      colorClass: isWinnerPromoted ? "bg-emerald-50 text-emerald-900 border-emerald-300 font-semibold" : "bg-blue-50 text-blue-900 border-blue-200"
+      name: isWinnerPromoted ? "VAR_B: 100% PROD" : "VAR_B: HYBRID_RAG",
+      latency: isWinnerPromoted ? "WINNER" : "1080ms",
+      color: "text-[#059669]"
     },
-    agentic_self_reflection: {
-      label: "Variant C (agentic_self_reflection)",
-      badge: "2810ms",
-      colorClass: "bg-purple-50 text-purple-900 border-purple-200"
-    }
+    agentic_self_reflection: { name: "VAR_C: AGENTIC_COT", latency: "2810ms", color: "text-[#7C3AED]" }
   };
 
-  const currentVariantInfo = variantLabels[variant];
+  const currentVariant = variantLabels[variant];
 
   return (
-    <header className="border-b border-[#E7E2D9] bg-[#FAF8F5]/90 backdrop-blur-md sticky top-0 z-40 px-4 lg:px-8 py-3">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        {/* Left: Brand & Badges */}
+    <header className="border-b-[1.5px] border-[#151413] bg-[#F6F4EE] px-4 lg:px-8 py-2.5 select-none">
+      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 font-mono">
+        {/* Brand & System Status */}
         <div className="flex items-center gap-3">
-          <div className="flex items-baseline gap-2">
-            <span className="font-serif-display text-2xl font-bold tracking-tight text-[#181715]">
-              RouteSmith
-            </span>
-            <span className="text-xs tracking-widest uppercase font-mono-code text-[#8E887E]">
-              AI
+          <div className="flex items-center gap-2">
+            <span className="w-2.5 h-2.5 bg-[#151413]"></span>
+            <span className="font-bold tracking-tight text-sm text-[#151413]">
+              ROUTESMITH//AI
             </span>
           </div>
 
-          <span className="hidden sm:inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-mono-code bg-[#F3EFEA] text-[#6B665E] border border-[#E7E2D9]">
-            <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
-            Flagsmith SDK v6.5
-          </span>
+          <div className="flex items-center gap-1.5 px-2 py-0.5 border border-[#151413] bg-[#EDEAE1] text-[10px] text-[#151413]">
+            <span className="led-indicator led-green"></span>
+            <span>FLAGSMITH CONTROL PLANE</span>
+          </div>
         </div>
 
-        {/* Center: Navigation Tabs */}
-        <nav className="flex items-center bg-[#F3EFEA] p-1 rounded-full border border-[#E7E2D9] text-xs font-medium">
+        {/* View Mode Switcher (Hardware Segmented Bar) */}
+        <nav className="flex items-center border-[1.5px] border-[#151413] bg-[#EDEAE1] p-0.5 shadow-[1.5px_1.5px_0px_#151413]">
           <button
             onClick={() => setActiveTab("copilot")}
-            className={`px-3.5 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all ${
               activeTab === "copilot"
-                ? "bg-white text-[#181715] shadow-xs border border-[#E7E2D9] font-semibold"
-                : "text-[#6B665E] hover:text-[#181715]"
+                ? "bg-[#151413] text-[#F6F4EE]"
+                : "text-[#7A756D] hover:text-[#151413]"
             }`}
           >
-            Copilot & Sandbox
+            01//Copilot
           </button>
           <button
             onClick={() => setActiveTab("rounds")}
-            className={`px-3.5 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all ${
               activeTab === "rounds"
-                ? "bg-white text-[#181715] shadow-xs border border-[#E7E2D9] font-semibold"
-                : "text-[#6B665E] hover:text-[#181715]"
+                ? "bg-[#151413] text-[#F6F4EE]"
+                : "text-[#7A756D] hover:text-[#151413]"
             }`}
           >
-            4-Round Lifecycle
+            02//Lifecycle
           </button>
           <button
             onClick={() => setActiveTab("simulator")}
-            className={`px-3.5 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all ${
               activeTab === "simulator"
-                ? "bg-white text-[#181715] shadow-xs border border-[#E7E2D9] font-semibold"
-                : "text-[#6B665E] hover:text-[#181715]"
+                ? "bg-[#151413] text-[#F6F4EE]"
+                : "text-[#7A756D] hover:text-[#151413]"
             }`}
           >
-            Swarm Simulator (1,500)
+            03//1500-Swarm
           </button>
           <button
             onClick={() => setActiveTab("analytics")}
-            className={`px-3.5 py-1.5 rounded-full transition-all ${
+            className={`px-3 py-1 text-[11px] font-bold tracking-wider uppercase transition-all ${
               activeTab === "analytics"
-                ? "bg-white text-[#181715] shadow-xs border border-[#E7E2D9] font-semibold"
-                : "text-[#6B665E] hover:text-[#181715]"
+                ? "bg-[#151413] text-[#F6F4EE]"
+                : "text-[#7A756D] hover:text-[#151413]"
             }`}
           >
-            Bayesian Telemetry
+            04//Bayesian
           </button>
         </nav>
 
-        {/* Right: Active Identity HUD & New Session Button */}
+        {/* Identity & Active Variant HUD */}
         <div className="flex items-center gap-2">
-          {/* Identity Chip */}
-          <div className="hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-white border border-[#E7E2D9] text-xs font-mono-code text-[#44403C]">
-            <span className="text-[#8E887E]">id:</span>
-            <span className="font-semibold text-[#181715]">{currentIdentity}</span>
+          {/* Active Variant */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 border-[1.5px] border-[#151413] bg-[#FFFFFF] text-[10px]">
+            <span className={`font-bold ${currentVariant.color}`}>{currentVariant.name}</span>
+            <span className="text-[#A39E94]">|</span>
+            <span className="font-semibold text-[#151413]">{currentVariant.latency}</span>
           </div>
 
-          {/* Active Variant Pill */}
-          <div
-            className={`px-2.5 py-1 rounded-md border text-xs font-mono-code flex items-center gap-2 transition-all ${currentVariantInfo.colorClass}`}
-          >
-            <span>{currentVariantInfo.label}</span>
-            <span className="keycap-badge text-[10px] py-0">{currentVariantInfo.badge}</span>
+          {/* Identity Tag */}
+          <div className="px-2 py-1 border border-[#D3CDC1] bg-[#EDEAE1] text-[10px] text-[#7A756D]">
+            ID: <span className="text-[#151413] font-bold">{currentIdentity}</span>
           </div>
 
-          {/* New User Session Switcher Button */}
+          {/* Reroll Button */}
           <button
             onClick={onNewSession}
             disabled={isSwitching}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-[#181715] hover:bg-[#2D2A26] text-white text-xs font-medium transition-all shadow-xs active:translate-y-px disabled:opacity-50"
-            title="Generate a fresh UUID identity to test 33/33/34 traffic partitioning"
+            className="pixel-btn flex items-center gap-1 py-1 px-2.5"
+            title="Evaluate fresh identity across 33/33/34 split"
           >
             <RefreshCw className={`w-3 h-3 ${isSwitching ? "animate-spin" : ""}`} />
-            <span>New Session</span>
+            <span>REROLL</span>
           </button>
         </div>
       </div>
     </header>
   );
 };
-
