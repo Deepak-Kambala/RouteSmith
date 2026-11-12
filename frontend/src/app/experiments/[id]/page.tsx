@@ -166,53 +166,50 @@ export default function ExperimentDetailsPage() {
         {/* TAB 1: OVERVIEW */}
         {activeTab === "overview" && (
           <div className="space-y-6">
-            {/* Hypothesis & Objective Card */}
-            <div className="dev-card p-5 space-y-3">
-              <span className="text-xs font-semibold text-[#64748B] uppercase tracking-wider block">
-                Primary Hypothesis
+            {/* Hypothesis Card */}
+            <div className="dev-card p-5 space-y-2">
+              <span className="text-[11px] font-semibold text-[#64748B] uppercase tracking-wider block">
+                Hypothesis
               </span>
               <p className="text-sm text-[#111827] leading-relaxed font-medium">
                 &ldquo;{experiment.hypothesis}&rdquo;
               </p>
-              <div className="text-xs text-[#64748B]">
-                <strong>Business Objective:</strong> {experiment.objective}
-              </div>
             </div>
 
             {/* Side-by-side Conversion Comparison */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {/* Control */}
-              <div className="dev-card p-5 space-y-3">
+              <div className="dev-card p-5 space-y-2">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#64748B]">Control (Variant A)</span>
+                  <span className="text-xs font-semibold text-[#64748B]">Variant A (Control)</span>
                   <span className="text-xs font-mono-code bg-[#F8FAFC] px-2 py-0.5 rounded border border-[#E5E7EB]">
-                    {control.weight}% Split
+                    {control.weight}%
                   </span>
                 </div>
                 <div className="text-[28px] font-[650] text-[#111827]">
                   {control.conversion_rate}%
                 </div>
-                <div className="text-xs text-[#64748B]">
-                  {control.conversions.toLocaleString()} conversions / {control.exposures.toLocaleString()} exposures
+                <div className="text-xs text-[#64748B] font-mono-code">
+                  {control.conversions.toLocaleString()} / {control.exposures.toLocaleString()} converted
                 </div>
               </div>
 
               {/* Treatment */}
-              <div className="dev-card p-5 space-y-3 border-2 border-[#16A36A] bg-[#F0FDF4]/30">
+              <div className="dev-card p-5 space-y-2 border-2 border-[#16A36A] bg-[#F0FDF4]/30">
                 <div className="flex items-center justify-between">
-                  <span className="text-xs font-semibold text-[#16A36A]">Treatment (Variant B) [Dominant Winner]</span>
+                  <span className="text-xs font-semibold text-[#16A36A]">Variant B (Treatment) [Winner]</span>
                   <span className="text-xs font-mono-code bg-[#DCFCE7] text-[#16A36A] px-2 py-0.5 rounded border border-[#86EFAC] font-semibold">
-                    {treatment.weight}% Split
+                    {treatment.weight}%
                   </span>
                 </div>
                 <div className="text-[28px] font-[650] text-[#16A36A]">
                   {treatment.conversion_rate}%
                 </div>
-                <div className="text-xs text-[#16A36A]">
-                  {treatment.conversions.toLocaleString()} conversions / {treatment.exposures.toLocaleString()} exposures
+                <div className="text-xs text-[#16A36A] font-mono-code">
+                  {treatment.conversions.toLocaleString()} / {treatment.exposures.toLocaleString()} converted
                   {experiment.metrics.relative_lift && (
-                    <strong className="ml-2 font-mono-code">
-                      (+{experiment.metrics.relative_lift.toFixed(1)}% Relative Lift)
+                    <strong className="ml-1.5">
+                      (+{experiment.metrics.relative_lift.toFixed(1)}% lift)
                     </strong>
                   )}
                 </div>

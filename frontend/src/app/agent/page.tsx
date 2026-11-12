@@ -295,12 +295,12 @@ export function SignupForm({ userId }: { userId: string }) {
                 <Bot className="w-3.5 h-3.5" />
               </div>
               <span className="text-xs font-semibold text-[#111827]">
-                Experimentation Engineer (Gemini 2.0 runtime)
+                AI Agent
               </span>
             </div>
             <span className="text-[11px] font-mono-code text-[#16A36A] flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-[#16A36A]"></span>
-              Tool Calling Active
+              Active
             </span>
           </div>
 

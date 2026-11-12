@@ -90,7 +90,7 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobileMenu }) => {
           className="hidden sm:flex items-center gap-2 px-3 py-1.5 text-xs rounded-lg border border-[#E5E7EB] bg-[#F8FAFC] text-[#64748B] hover:border-[#D1D5DB] hover:text-[#111827] transition-colors"
         >
           <Search className="w-3.5 h-3.5 text-[#94A3B8]" />
-          <span>Search experiments, flags or tools...</span>
+          <span>Search...</span>
           <kbd className="inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono-code bg-white rounded border border-[#E5E7EB] text-[#64748B]">
             <Command className="w-2.5 h-2.5" /> K
           </kbd>
@@ -98,8 +98,8 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobileMenu }) => {
 
         {/* AI Agent Status Pill */}
         <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-[#EFF4FF] border border-[#BFDBFE] text-[#1E40AF]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#3867F5] animate-pulse"></span>
-          <span className="font-medium text-[11px]">AI Agent Idle</span>
+          <span className="w-1.5 h-1.5 rounded-full bg-[#3867F5]"></span>
+          <span className="font-medium text-[11px]">Ready</span>
         </div>
 
         {/* Notifications */}

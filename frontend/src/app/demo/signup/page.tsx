@@ -141,17 +141,11 @@ export default function DemoSignupPage() {
         {/* Top Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-[#E5E7EB]">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-[#16A36A] animate-pulse"></span>
-              <span className="text-xs font-semibold text-[#16A36A] uppercase tracking-wider">
-                Live End-to-End Workflow Demonstration
-              </span>
-            </div>
             <h1 className="text-[26px] font-[650] tracking-tight text-[#111827]">
-              Registration Flow A/B Test
+              Registration A/B Test
             </h1>
-            <p className="text-sm text-[#64748B] mt-0.5">
-              Experiment: <strong className="text-[#111827]">exp_signup_v2</strong> &bull; Flagsmith Flag: <code className="font-mono-code text-[#3867F5]">signup_form_simplification</code>
+            <p className="text-xs text-[#64748B] mt-0.5 font-mono-code">
+              Flag: <span className="text-[#3867F5] font-semibold">signup_form_simplification</span>
             </p>
           </div>
 
@@ -161,7 +155,7 @@ export default function DemoSignupPage() {
               className="btn-secondary text-xs flex items-center gap-1.5"
             >
               <RotateCcw className="w-3.5 h-3.5 text-[#3867F5]" />
-              <span>Reroll Participant ID</span>
+              <span>Reroll User</span>
             </button>
           </div>
         </div>
@@ -170,12 +164,11 @@ export default function DemoSignupPage() {
         <div className="dev-card p-4 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-[#F8FAFC]">
           <div className="text-xs space-y-1">
             <div className="flex items-center gap-2 font-mono-code">
-              <span className="text-[#64748B]">SESSION ID:</span>
+              <span className="text-[#64748B]">USER ID:</span>
               <span className="font-bold text-[#111827] bg-white px-2 py-0.5 rounded border border-[#E5E7EB]">
                 {participantId}
               </span>
               <span className="text-[#94A3B8]">&bull;</span>
-              <span className="text-[#64748B]">ALLOCATION:</span>
               <span
                 className={`font-semibold px-2 py-0.5 rounded ${
                   selectedVariant === "treatment"
@@ -183,12 +176,9 @@ export default function DemoSignupPage() {
                     : "bg-[#F1F5F9] text-[#64748B] border border-[#E2E8F0]"
                 }`}
               >
-                {selectedVariant === "treatment" ? "Variant B (Treatment 3-Field)" : "Variant A (Control 6-Field)"}
+                {selectedVariant === "treatment" ? "Variant B (3 Fields)" : "Variant A (6 Fields)"}
               </span>
             </div>
-            <p className="text-[11px] text-[#64748B]">
-              Flagsmith evaluates this identity and dynamically switches the form layout in real time.
-            </p>
           </div>
 
           {/* Manual Variant Toggle for Developer Testing */}
@@ -221,17 +211,12 @@ export default function DemoSignupPage() {
           {/* Left Column: The Interactive Sample Signup Form (7 cols) */}
           <div className="lg:col-span-7 dev-card p-6 space-y-5">
             <div className="pb-3 border-b border-[#E5E7EB]">
-              <span className="text-xs font-semibold text-[#3867F5] uppercase tracking-wider block mb-1">
-                Rendered Experience: {selectedVariant === "treatment" ? "Streamlined Variant B" : "Original Variant A"}
+              <span className="text-[11px] font-semibold text-[#3867F5] uppercase tracking-wider block mb-0.5">
+                {selectedVariant === "treatment" ? "Variant B (3 Fields)" : "Variant A (6 Fields)"}
               </span>
-              <h2 className="text-[20px] font-[650] text-[#111827]">
-                Create your developer account
+              <h2 className="text-[18px] font-[650] text-[#111827]">
+                Create your account
               </h2>
-              <p className="text-xs text-[#64748B] mt-0.5">
-                {selectedVariant === "treatment"
-                  ? "Join 10,000+ engineers building high-velocity software."
-                  : "Complete all required firmographic fields to access the enterprise trial."}
-              </p>
             </div>
 
             {hasConverted ? (
