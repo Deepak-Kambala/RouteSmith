@@ -1,23 +1,27 @@
 import os
 from pydantic import BaseModel
-from dotenv import load_dotenv
-
-load_dotenv()
+from typing import Optional
 
 class Settings(BaseModel):
-    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    FLAGSMITH_ENVIRONMENT_KEY: str = os.getenv("FLAGSMITH_ENVIRONMENT_KEY", "ser.mock_routesmith_key")
-    FLAGSMITH_CLIENT_KEY: str = os.getenv("FLAGSMITH_CLIENT_KEY", "mock_client_key")
-    FLAGSMITH_ADMIN_API_KEY: str = os.getenv("FLAGSMITH_ADMIN_API_KEY", "")
-    FLAGSMITH_API_URL: str = os.getenv("FLAGSMITH_API_URL", "https://edge.api.flagsmith.com/api/v1/")
-    FLAGSMITH_PROJECT_ID: str = os.getenv("FLAGSMITH_PROJECT_ID", "routesmith-prod")
-    FLAGSMITH_FEATURE_NAME: str = "rag_pipeline_strategy"
+    # App
+    app_name: str = "RouteSmith"
+    env: str = os.getenv("ENV", "production")
     
-    # Secondary guardrail flags
-    FLAG_ENABLE_SEMANTIC_CACHE: str = "enable_semantic_cache"
-    FLAG_MAX_CONTEXT_TOKENS: str = "max_context_tokens"
+    # Gemini API Key (loaded from .env)
+    gemini_api_key: str = os.getenv("GEMINI_API_KEY", "")
     
-    # Conversion metric name
-    METRIC_ANSWER_RESOLVED: str = "answer_resolved"
+    # Flagsmith Credentials
+    flagsmith_environment_key: Optional[str] = os.getenv("FLAGSMITH_ENVIRONMENT_KEY")
+    flagsmith_api_url: str = os.getenv("FLAGSMITH_API_URL", "https://edge.api.flagsmith.com/api/v1/")
+    flagsmith_admin_api_key: Optional[str] = os.getenv("FLAGSMITH_ADMIN_API_KEY")
+    
+    # GitHub Integration
+    github_access_token: Optional[str] = os.getenv("GITHUB_ACCESS_TOKEN")
+    github_default_repo: str = os.getenv("GITHUB_DEFAULT_REPO", "Deepak-Kambala/RouteSmith")
+    
+    # Database
+    database_url: str = os.getenv("DATABASE_URL", "sqlite:///./routesmith.db")
+    supabase_url: Optional[str] = os.getenv("SUPABASE_URL")
+    supabase_service_role_key: Optional[str] = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
 
 settings = Settings()

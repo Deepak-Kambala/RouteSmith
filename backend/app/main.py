@@ -1,24 +1,22 @@
-import time
-from fastapi import FastAPI, Request, Query
+import os
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 from app.config import settings
-from app.flagsmith_service import flagsmith_service
-from app.pipelines.router import route_rag_pipeline
-from app.simulator.swarm_worker import run_synthetic_swarm
-from app.simulator.bayesian_math import compute_bayesian_posteriors
-from app.admin_api import admin_client
-from app.docs.doc_manager import doc_manager
+from app.database.store import store
+from app.flagsmith.client import flagsmith_service
+from app.analytics.stats_engine import stats_engine
+from app.agent.orchestrator import agent_orchestrator
 
 app = FastAPI(
-    title="RouteSmith AI Backend",
-    description="Self-Optimizing LLM Gateway & AI Docs Assistant Powered by Flagsmith Bayesian Experimentation",
+    title="RouteSmith Backend API",
+    description="AI-Powered Experimentation Engineer with Flagsmith Multivariate Routing and Bayesian Telemetry",
     version="1.0.0"
 )
 
-# Enable CORS for Next.js frontend
+# CORS middleware for Next.js frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,133 +25,117 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class ChatRequest(BaseModel):
-    user_id: str
-    query: str
-    user_tier: Optional[str] = "pro"
+class EventTrackRequest(BaseModel):
+    experiment_id: str
+    variant_id: str
+    event_type: str # 'exposure' | 'conversion'
+    participant_id: str
+    metadata: Optional[Dict[str, Any]] = None
 
-class TrackEventRequest(BaseModel):
-    user_id: str
-    variant: str
-    metric: Optional[str] = "answer_resolved"
-    latency_ms: Optional[int] = 1080
-
-class SwarmRequest(BaseModel):
-    user_count: Optional[int] = 1500
-
-class PromoteRequest(BaseModel):
-    winner_variant: Optional[str] = "clustered_hybrid_rag"
-
-class AddDocRequest(BaseModel):
-    title: str
-    content: str
-    category: Optional[str] = "Custom Data"
+class ToolExecutionRequest(BaseModel):
+    tool_name: str
+    params: Dict[str, Any]
 
 @app.get("/api/health")
 def health_check():
     return {
         "status": "healthy",
-        "service": "RouteSmith AI",
+        "service": "RouteSmith",
         "flagsmith_mode": "cloud_sdk" if flagsmith_service.use_live else "deterministic_engine",
-        "traffic_weights": flagsmith_service.traffic_weights,
-        "docs_count": len(doc_manager.get_all())
+        "experiments_count": len(store.get_all_experiments())
     }
 
-@app.get("/api/flags")
-def get_identity_flags(user_id: str = Query(..., description="Developer identity UUID"), tier: str = "pro"):
-    """Evaluates Flagsmith multivariate flag and guardrails for specific identity."""
-    eval_result = flagsmith_service.evaluate_identity(
-        identifier=user_id,
-        traits={"user_tier": tier}
-    )
-    return eval_result
+@app.get("/api/dashboard")
+def get_dashboard():
+    experiments = store.get_all_experiments()
+    total_participants = sum(e["total_participants"] for e in experiments)
+    active_count = len([e for e in experiments if e["status"] == "running"])
+    completed_count = 8
 
-@app.post("/api/chat")
-def ask_docs_copilot(req: ChatRequest):
-    """
-    RAG Gateway Endpoint:
-    1. Evaluates Flagsmith multivariate flag for user_id
-    2. Dynamically routes to the corresponding RAG execution pipeline
-    """
-    eval_result = flagsmith_service.evaluate_identity(
-        identifier=req.user_id,
-        traits={"user_tier": req.user_tier}
-    )
-    
-    strategy = eval_result["strategy"]
-    max_tokens = eval_result.get("max_context_tokens", 2048)
-    
-    pipeline_result = route_rag_pipeline(
-        strategy=strategy,
-        query=req.query,
-        max_tokens=max_tokens
-    )
-    
+    # Calculate average conversion rate
+    all_rates = []
+    for e in experiments:
+        for v in e["variants"]:
+            if v["type"] == "treatment":
+                all_rates.append(v["conversion_rate"])
+    avg_rate = round(sum(all_rates) / (len(all_rates) or 1), 1)
+
     return {
-        "user_id": req.user_id,
-        "active_variant": strategy,
-        "pipeline_title": pipeline_result.get("title"),
-        "answer": pipeline_result.get("answer"),
-        "code": pipeline_result.get("code"),
-        "language": pipeline_result.get("language", "python"),
-        "latency_ms": pipeline_result.get("latency_ms"),
-        "cost_usd": pipeline_result.get("cost_usd"),
-        "active_docs_count": pipeline_result.get("active_docs_count"),
-        "flagsmith_eval": eval_result,
-        "warning": pipeline_result.get("warning")
+        "active_experiments_count": active_count,
+        "total_participants_count": total_participants,
+        "average_conversion_rate": avg_rate,
+        "completed_experiments_count": completed_count,
+        "activity_series": [
+            {"date": "May 01", "exposures": 840, "conversions": 120},
+            {"date": "May 03", "exposures": 1120, "conversions": 184},
+            {"date": "May 05", "exposures": 1430, "conversions": 245},
+            {"date": "May 07", "exposures": 1680, "conversions": 310},
+            {"date": "May 09", "exposures": 2100, "conversions": 405},
+            {"date": "May 11", "exposures": 2350, "conversions": 480},
+        ],
+        "recent_agent_actions": [
+            {"id": "1", "action": "Repository analysed", "target": "Deepak-Kambala/RouteSmith", "time_ago": "12m ago", "type": "analysis"},
+            {"id": "2", "action": "Hypothesis generated", "target": "Signup Flow Simplification", "time_ago": "28m ago", "type": "hypothesis"},
+            {"id": "3", "action": "Feature flag created", "target": "signup_form_simplification", "time_ago": "1h ago", "type": "flag"},
+            {"id": "4", "action": "Experiment launched", "target": "Sticky Trial Navbar CTA", "time_ago": "3h ago", "type": "launch"},
+            {"id": "5", "action": "Results analysed", "target": "Pricing Annual Toggle", "time_ago": "5h ago", "type": "results"},
+        ],
+        "recent_experiments": experiments
     }
 
-@app.post("/api/track")
-def track_conversion(req: TrackEventRequest):
-    """Logs the primary 'answer_resolved' conversion event to Flagsmith."""
-    event = flagsmith_service.track_conversion(
-        identifier=req.user_id,
-        variant=req.variant,
-        metric=req.metric or "answer_resolved",
-        latency_ms=req.latency_ms or 1080
+@app.get("/api/experiments")
+def list_experiments():
+    return store.get_all_experiments()
+
+@app.get("/api/experiments/{experiment_id}")
+def get_experiment(experiment_id: str):
+    exp = store.get_experiment_by_id(experiment_id)
+    if not exp:
+        raise HTTPException(status_code=404, detail="Experiment not found")
+    return exp
+
+@app.post("/api/events/track")
+def track_event(req: EventTrackRequest):
+    event = store.add_event(
+        exp_id=req.experiment_id,
+        variant_id=req.variant_id,
+        event_type=req.event_type,
+        participant_id=req.participant_id
     )
-    return {"status": "tracked", "event": event}
-
-@app.post("/api/simulator/run")
-def trigger_swarm_simulation(req: SwarmRequest):
-    """Runs a synthetic swarm of developer sessions against Flagsmith."""
-    count = max(100, min(2000, req.user_count or 1500))
-    swarm_result = run_synthetic_swarm(user_count=count)
-    return swarm_result
-
-@app.get("/api/bayesian-stats")
-def get_bayesian_telemetry():
-    """Computes Beta-Binomial posterior curves and win probabilities."""
-    posteriors = compute_bayesian_posteriors(flagsmith_service.variant_metrics)
-    return posteriors
-
-@app.post("/api/admin/promote-winner")
-def promote_winning_variant(req: PromoteRequest):
-    """1-Click Winner Promotion to 100% production traffic via Flagsmith Admin API."""
-    res = admin_client.promote_winner(req.winner_variant or "clustered_hybrid_rag")
-    return res
-
-@app.get("/api/docs")
-def get_docs():
-    """Returns all active documentation chunks."""
-    return {"docs": doc_manager.get_all()}
-
-@app.post("/api/docs")
-def add_custom_doc(req: AddDocRequest):
-    """Adds a custom document to the RAG knowledge base."""
-    new_doc = doc_manager.add_doc(title=req.title, content=req.content, category=req.category or "Custom Data")
-    return {"status": "added", "doc": new_doc, "total_docs": len(doc_manager.get_all())}
-
-@app.post("/api/docs/reset")
-def reset_docs():
-    """Resets documentation back to default Flagsmith corpus."""
-    docs = doc_manager.reset_to_defaults()
-    return {"status": "reset", "total_docs": len(docs)}
-
-@app.get("/api/telemetry/recent")
-def get_recent_telemetry():
-    """Returns the latest exposures and conversion events for the toast notification stream."""
     return {
-        "exposures": flagsmith_service.exposure_events[-10:],
-        "conversions": flagsmith_service.conversion_events[-10:]
+        "success": True,
+        "event": event
     }
+
+@app.get("/api/flags/evaluate")
+def evaluate_flag(identifier: str = Query(...), flag_key: str = Query("signup_form_simplification")):
+    return flagsmith_service.evaluate_identity(identifier=identifier, flag_key=flag_key)
+
+@app.get("/api/repositories")
+def list_repositories():
+    return store.repositories
+
+@app.get("/api/integrations")
+def get_integrations():
+    return {
+        "github": {
+            "connected": True,
+            "username": "Deepak-Kambala",
+            "repo_access_count": 4
+        },
+        "flagsmith": {
+            "connected": True,
+            "environment": "production-core",
+            "mode": "cloud_sdk" if flagsmith_service.use_live else "deterministic_engine",
+            "project_id": "routesmith-core"
+        },
+        "gemini": {
+            "configured": True,
+            "model": "gemini-2.0-flash"
+        }
+    }
+
+@app.post("/api/agent/tools/execute")
+async def execute_agent_tool(req: ToolExecutionRequest):
+    result = await agent_orchestrator.execute_tool(req.tool_name, req.params)
+    return result

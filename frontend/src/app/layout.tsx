@@ -2,8 +2,8 @@ import type { Metadata } from "next";
 import "./tailwind.css";
 
 export const metadata: Metadata = {
-  title: "RouteSmith AI - Self-Optimizing LLM Gateway",
-  description: "Self-Optimizing LLM Gateway & AI Docs Assistant Powered by Flagsmith Bayesian Experimentation",
+  title: "RouteSmith — AI-Powered Experimentation Engineer",
+  description: "Turn any product improvement goal into a live, measurable experiment with automated Flagsmith feature flags and Bayesian telemetry.",
 };
 
 export default function RootLayout({
@@ -17,11 +17,11 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link
-          href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Silkscreen:wght@400;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap"
+          href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;650;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
           rel="stylesheet"
         />
       </head>
-      <body className="min-h-full flex flex-col bg-[#FAF8F5] text-[#181715]">
+      <body className="min-h-full flex flex-col bg-[#F8FAFC] text-[#111827]">
         {children}
       </body>
     </html>
