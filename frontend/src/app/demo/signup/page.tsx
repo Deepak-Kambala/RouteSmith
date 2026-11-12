@@ -144,8 +144,8 @@ export default function DemoSignupPage() {
             <h1 className="text-[26px] font-[650] tracking-tight text-[#111827]">
               Registration A/B Test
             </h1>
-            <p className="text-xs text-[#64748B] mt-0.5 font-mono-code">
-              Flag: <span className="text-[#3867F5] font-semibold">signup_form_simplification</span>
+            <p className="text-xs text-[#71717A] mt-0.5 font-mono-code">
+              Flag: <span className="text-[#09090B] font-semibold">signup_form_simplification</span>
             </p>
           </div>
 
@@ -154,7 +154,7 @@ export default function DemoSignupPage() {
               onClick={handleRerollSession}
               className="btn-secondary text-xs flex items-center gap-1.5"
             >
-              <RotateCcw className="w-3.5 h-3.5 text-[#3867F5]" />
+              <RotateCcw className="w-3.5 h-3.5 text-[#09090B]" />
               <span>Reroll User</span>
             </button>
           </div>
@@ -187,8 +187,8 @@ export default function DemoSignupPage() {
               onClick={() => handleManualVariantSwitch("control")}
               className={`px-3 py-1.5 rounded-md font-medium transition-all ${
                 selectedVariant === "control"
-                  ? "bg-[#111827] text-white font-semibold"
-                  : "text-[#64748B] hover:text-[#111827]"
+                  ? "bg-[#09090B] text-white font-semibold"
+                  : "text-[#71717A] hover:text-[#09090B]"
               }`}
             >
               Test Variant A (6 Fields)
@@ -197,8 +197,8 @@ export default function DemoSignupPage() {
               onClick={() => handleManualVariantSwitch("treatment")}
               className={`px-3 py-1.5 rounded-md font-medium transition-all ${
                 selectedVariant === "treatment"
-                  ? "bg-[#3867F5] text-white font-semibold"
-                  : "text-[#64748B] hover:text-[#111827]"
+                  ? "bg-[#09090B] text-white font-semibold"
+                  : "text-[#71717A] hover:text-[#09090B]"
               }`}
             >
               Test Variant B (3 Fields)
@@ -211,7 +211,7 @@ export default function DemoSignupPage() {
           {/* Left Column: The Interactive Sample Signup Form (7 cols) */}
           <div className="lg:col-span-7 dev-card p-6 space-y-5">
             <div className="pb-3 border-b border-[#E5E7EB]">
-              <span className="text-[11px] font-semibold text-[#3867F5] uppercase tracking-wider block mb-0.5">
+              <span className="text-[11px] font-semibold text-[#09090B] uppercase tracking-wider block mb-0.5">
                 {selectedVariant === "treatment" ? "Variant B (3 Fields)" : "Variant A (6 Fields)"}
               </span>
               <h2 className="text-[18px] font-[650] text-[#111827]">
@@ -401,12 +401,12 @@ export default function DemoSignupPage() {
             </div>
 
             {/* AI Decision Box */}
-            <div className="p-4 rounded-xl border border-[#BFDBFE] bg-[#EFF4FF] text-xs text-[#1E40AF] space-y-1.5">
+            <div className="p-4 rounded-xl border border-[#E4E4E7] bg-[#FAFAFA] text-xs text-[#09090B] space-y-1.5">
               <div className="font-semibold flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5 text-[#3867F5]" />
+                <Sparkles className="w-3.5 h-3.5 text-[#09090B]" />
                 <span>AI Experimenter Evaluation</span>
               </div>
-              <p className="leading-relaxed text-[11px]">
+              <p className="leading-relaxed text-[11px] text-[#52525B]">
                 Treatment Variant B displays lower friction leading to an observed relative lift of +{lift}%. Statistical confidence interval has satisfied the minimum detectable effect.
               </p>
             </div>

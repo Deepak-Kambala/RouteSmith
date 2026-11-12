@@ -64,15 +64,15 @@ export default function ExperimentsListPage() {
 
         {/* Filters & Search Bar */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-          <div className="flex items-center gap-1 p-1 rounded-lg bg-[#FFFFFF] border border-[#E5E7EB] text-xs">
+          <div className="flex items-center gap-1 p-1 rounded-lg bg-[#FFFFFF] border border-[#E4E4E7] text-xs">
             {(["all", "running", "paused", "concluded"] as const).map((s) => (
               <button
                 key={s}
                 onClick={() => setFilter(s)}
                 className={`px-3 py-1.5 rounded-md font-medium capitalize transition-all ${
                   filter === s
-                    ? "bg-[#EFF4FF] text-[#1E40AF] font-semibold"
-                    : "text-[#64748B] hover:text-[#111827]"
+                    ? "bg-[#09090B] text-white font-medium"
+                    : "text-[#71717A] hover:text-[#09090B]"
                 }`}
               >
                 {s}
@@ -116,7 +116,7 @@ export default function ExperimentsListPage() {
                     <td className="py-3.5 px-5">
                       <Link
                         href={`/experiments/${exp.id}`}
-                        className="font-semibold text-[#111827] hover:text-[#3867F5] transition-colors block text-xs"
+                        className="font-semibold text-[#09090B] hover:text-[#71717A] transition-colors block text-xs"
                       >
                         {exp.name}
                       </Link>

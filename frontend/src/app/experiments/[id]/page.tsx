@@ -99,13 +99,13 @@ export default function ExperimentDetailsPage() {
               </span>
             </div>
 
-            <div className="flex items-center gap-3 text-xs text-[#64748B] font-mono-code">
+            <div className="flex items-center gap-3 text-xs text-[#71717A] font-mono-code">
               <div className="flex items-center gap-1.5">
-                <GitBranch className="w-3.5 h-3.5 text-[#94A3B8]" />
+                <GitBranch className="w-3.5 h-3.5 text-[#A1A1AA]" />
                 <span>{experiment.repository_name}</span>
               </div>
               <span>&bull;</span>
-              <span>Flag: <code className="text-[#3867F5] font-semibold">{experiment.feature_flag_key}</code></span>
+              <span>Flag: <code className="text-[#09090B] font-semibold">{experiment.feature_flag_key}</code></span>
             </div>
           </div>
 
@@ -140,7 +140,7 @@ export default function ExperimentDetailsPage() {
         </div>
 
         {/* 6 Tab Navigation */}
-        <div className="flex items-center gap-1 border-b border-[#E5E7EB] text-xs font-medium">
+        <div className="flex items-center gap-1 border-b border-[#E4E4E7] text-xs font-medium">
           {[
             { id: "overview", label: "Overview" },
             { id: "variants", label: "Variants" },
@@ -154,8 +154,8 @@ export default function ExperimentDetailsPage() {
               onClick={() => setActiveTab(tab.id as any)}
               className={`px-4 py-2.5 border-b-2 transition-all ${
                 activeTab === tab.id
-                  ? "border-[#3867F5] text-[#1E40AF] font-semibold"
-                  : "border-transparent text-[#64748B] hover:text-[#111827]"
+                  ? "border-[#09090B] text-[#09090B] font-semibold"
+                  : "border-transparent text-[#71717A] hover:text-[#09090B]"
               }`}
             >
               {tab.label}
@@ -237,17 +237,17 @@ export default function ExperimentDetailsPage() {
               </div>
             </div>
 
-            <div className="dev-card p-5 space-y-3 border-2 border-[#3867F5]">
-              <div className="flex items-center justify-between pb-2 border-b border-[#E5E7EB]">
-                <span className="text-sm font-semibold text-[#1E40AF]">{treatment.name}</span>
-                <span className="text-xs font-mono-code text-[#3867F5] font-semibold">3 Fields</span>
+            <div className="dev-card p-5 space-y-3 border-2 border-[#09090B]">
+              <div className="flex items-center justify-between pb-2 border-b border-[#E4E4E7]">
+                <span className="text-sm font-semibold text-[#09090B]">{treatment.name}</span>
+                <span className="text-xs font-mono-code text-[#09090B] font-semibold">3 Fields</span>
               </div>
-              <p className="text-xs text-[#1E40AF] leading-relaxed">{treatment.description}</p>
-              <div className="p-3 rounded-lg bg-[#EFF4FF] border border-[#BFDBFE] text-xs font-mono-code space-y-1 text-[#1E40AF]">
+              <p className="text-xs text-[#52525B] leading-relaxed">{treatment.description}</p>
+              <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#E4E4E7] text-xs font-mono-code space-y-1 text-[#09090B]">
                 <div>- Full Name (required)</div>
                 <div>- Work Email (required)</div>
                 <div>- Password (required)</div>
-                <div className="text-[#94A3B8] italic pt-1">// Company &amp; role enriched asynchronously</div>
+                <div className="text-[#A1A1AA] italic pt-1">// Company &amp; role enriched asynchronously</div>
               </div>
             </div>
           </div>
@@ -345,12 +345,12 @@ export default function ExperimentDetailsPage() {
                 <div className="text-[11px] text-[#64748B]">Absolute Conversion Delta</div>
               </div>
 
-              <div className="p-4 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] space-y-1">
-                <span className="text-xs text-[#64748B]">Statistical Power (1 - &beta;)</span>
-                <div className="text-2xl font-bold font-mono-code text-[#3867F5]">
+              <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#E4E4E7] space-y-1">
+                <span className="text-xs text-[#71717A]">Statistical Power (1 - &beta;)</span>
+                <div className="text-2xl font-bold font-mono-code text-[#09090B]">
                   94.2%
                 </div>
-                <div className="text-[11px] text-[#64748B]">Sufficient Sample Size Target Met</div>
+                <div className="text-[11px] text-[#71717A]">Sufficient Sample Size Target Met</div>
               </div>
             </div>
           </div>
@@ -397,16 +397,16 @@ async function onSignupSuccess() {
         {activeTab === "insights" && (
           <div className="dev-card p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <Bot className="w-5 h-5 text-[#3867F5]" />
-              <h3 className="text-sm font-semibold text-[#111827]">Agent Interpretation &amp; Decision</h3>
+              <Bot className="w-5 h-5 text-[#09090B]" />
+              <h3 className="text-sm font-semibold text-[#09090B]">Agent Interpretation &amp; Decision</h3>
             </div>
 
-            <div className="p-4 rounded-xl bg-[#EFF4FF] border border-[#BFDBFE] text-xs text-[#1E40AF] space-y-2">
+            <div className="p-4 rounded-xl bg-[#FAFAFA] border border-[#E4E4E7] text-xs text-[#09090B] space-y-2">
               <div className="font-semibold flex items-center gap-1.5">
-                <Sparkles className="w-4 h-4 text-[#3867F5]" />
+                <Sparkles className="w-4 h-4 text-[#09090B]" />
                 <span>Executive Recommendation</span>
               </div>
-              <p className="leading-relaxed">
+              <p className="leading-relaxed text-[#52525B]">
                 {experiment.ai_recommendation}
               </p>
             </div>

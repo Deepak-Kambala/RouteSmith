@@ -97,8 +97,8 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobileMenu }) => {
         </button>
 
         {/* AI Agent Status Pill */}
-        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-[#EFF4FF] border border-[#BFDBFE] text-[#1E40AF]">
-          <span className="w-1.5 h-1.5 rounded-full bg-[#3867F5]"></span>
+        <div className="hidden lg:flex items-center gap-1.5 px-2.5 py-1 text-xs rounded-full bg-[#F4F4F5] border border-[#E4E4E7] text-[#09090B]">
+          <span className="w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
           <span className="font-medium text-[11px]">Ready</span>
         </div>
 
@@ -108,11 +108,11 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobileMenu }) => {
           title="Notifications"
         >
           <Bell className="w-4 h-4" />
-          <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-[#3867F5]"></span>
+          <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-[#10B981]"></span>
         </button>
 
         {/* User Avatar */}
-        <div className="w-8 h-8 rounded-full bg-[#EFF4FF] border border-[#BFDBFE] text-[#1E40AF] flex items-center justify-center text-xs font-semibold">
+        <div className="w-8 h-8 rounded-full bg-[#09090B] text-white flex items-center justify-center text-xs font-semibold">
           DK
         </div>
       </div>

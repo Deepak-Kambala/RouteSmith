@@ -19,9 +19,9 @@ export default function SettingsPage() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <Link href="/integrations" className="dev-card p-5 space-y-2 hover:border-[#3867F5] transition-all">
+          <Link href="/integrations" className="dev-card p-5 space-y-2 hover:border-[#09090B] transition-all">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-[#3867F5]" />
+              <Layers className="w-4 h-4 text-[#09090B]" />
               <span className="text-sm font-semibold text-[#111827]">Integrations &amp; Environment</span>
             </div>
             <p className="text-xs text-[#64748B] leading-relaxed">

@@ -88,9 +88,9 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="dev-card p-5 space-y-1.5">
-            <span className="text-xs text-[#64748B]">Total Evaluated Sessions</span>
-            <div className="text-[28px] font-[650] text-[#3867F5]">14,280</div>
-            <div className="text-[11px] text-[#64748B]">Zero allocation skew detected</div>
+            <span className="text-xs text-[#71717A]">Total Evaluated Sessions</span>
+            <div className="text-[28px] font-[650] text-[#09090B]">14,280</div>
+            <div className="text-[11px] text-[#71717A]">Zero allocation skew detected</div>
           </div>
         </div>
 
@@ -188,7 +188,7 @@ export default function AnalyticsPage() {
                       fontSize: "12px",
                     }}
                   />
-                  <Bar dataKey="rate" name="Conversion Rate" fill="#3867F5" radius={[0, 4, 4, 0]} />
+                  <Bar dataKey="rate" name="Conversion Rate" fill="#09090B" radius={[0, 4, 4, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : (

@@ -61,14 +61,14 @@ export default function RepositoriesPage() {
         </div>
 
         {/* Incremental Caching Info Banner */}
-        <div className="p-4 rounded-xl border border-[#E5E7EB] bg-white flex items-center justify-between text-xs text-[#64748B]">
+        <div className="p-4 rounded-xl border border-[#E4E4E7] bg-white flex items-center justify-between text-xs text-[#71717A]">
           <div className="flex items-center gap-2">
-            <Cpu className="w-4 h-4 text-[#3867F5] shrink-0" />
+            <Cpu className="w-4 h-4 text-[#09090B] shrink-0" />
             <span>
               <strong>Selective AST Indexing:</strong> RouteSmith caches component trees by git commit hash. Only modified files are parsed during agent reasoning sessions.
             </span>
           </div>
-          <span className="font-mono-code text-[11px] text-[#16A36A] font-semibold bg-[#F0FDF4] px-2 py-0.5 rounded border border-[#BBF7D0]">
+          <span className="font-mono-code text-[11px] text-[#059669] font-semibold bg-[#ECFDF5] px-2 py-0.5 rounded border border-[#A7F3D0]">
             Cache Active
           </span>
         </div>
@@ -77,21 +77,21 @@ export default function RepositoriesPage() {
         <div className="grid grid-cols-1 gap-4">
           {repos.map((repo) => (
             <div key={repo.id} className="dev-card p-6 space-y-4">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E5E7EB]">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-[#E4E4E7]">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-[#EFF4FF] border border-[#BFDBFE] text-[#3867F5] flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-xl bg-[#F4F4F5] border border-[#E4E4E7] text-[#09090B] flex items-center justify-center">
                     <FolderGit2 className="w-5 h-5" />
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h2 className="text-[17px] font-[600] text-[#111827]">{repo.owner}/{repo.name}</h2>
+                      <h2 className="text-[17px] font-[600] text-[#09090B]">{repo.owner}/{repo.name}</h2>
                       <span className="status-badge status-badge-active text-[10px]">
                         Connected
                       </span>
                     </div>
-                    <div className="flex items-center gap-3 text-xs text-[#64748B] font-mono-code mt-0.5">
+                    <div className="flex items-center gap-3 text-xs text-[#71717A] font-mono-code mt-0.5">
                       <div className="flex items-center gap-1">
-                        <GitBranch className="w-3.5 h-3.5 text-[#94A3B8]" />
+                        <GitBranch className="w-3.5 h-3.5 text-[#A1A1AA]" />
                         <span>branch: {repo.default_branch}</span>
                       </div>
                       <span>&bull;</span>
@@ -106,7 +106,7 @@ export default function RepositoriesPage() {
                     disabled={isScanning === repo.id}
                     className="btn-secondary text-xs flex items-center gap-1.5"
                   >
-                    <RefreshCw className={`w-3.5 h-3.5 ${isScanning === repo.id ? "animate-spin text-[#3867F5]" : ""}`} />
+                    <RefreshCw className={`w-3.5 h-3.5 ${isScanning === repo.id ? "animate-spin text-[#09090B]" : ""}`} />
                     <span>{isScanning === repo.id ? "Parsing AST..." : "Re-analyze AST"}</span>
                   </button>
 
@@ -145,9 +145,9 @@ export default function RepositoriesPage() {
                   </span>
                 </div>
 
-                <div className="p-3 rounded-lg bg-[#F8FAFC] border border-[#E5E7EB]">
-                  <span className="text-[#64748B] block">Active Experiments</span>
-                  <span className="font-semibold text-[#3867F5] font-mono-code mt-0.5 block">
+                <div className="p-3 rounded-lg bg-[#FAFAFA] border border-[#E4E4E7]">
+                  <span className="text-[#71717A] block">Active Experiments</span>
+                  <span className="font-semibold text-[#09090B] font-mono-code mt-0.5 block">
                     {repo.experiment_count} tests
                   </span>
                 </div>

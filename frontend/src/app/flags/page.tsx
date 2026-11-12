@@ -72,7 +72,7 @@ export default function FlagsPage() {
                 <tr key={flag.key} className="hover:bg-[#F8FAFC]">
                   <td className="py-3.5 px-5 font-mono-code font-semibold text-[#111827]">
                     <div className="flex items-center gap-2">
-                      <Flag className="w-3.5 h-3.5 text-[#3867F5]" />
+                      <Flag className="w-3.5 h-3.5 text-[#09090B]" />
                       <span>{flag.key}</span>
                     </div>
                     <span className="text-[11px] font-normal text-[#64748B] block mt-0.5">

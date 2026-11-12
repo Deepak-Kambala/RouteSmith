@@ -55,14 +55,14 @@ export default function IntegrationsPage() {
             disabled={isVerifying}
             className="btn-secondary text-xs flex items-center gap-1.5"
           >
-            <RefreshCw className={`w-3.5 h-3.5 ${isVerifying ? "animate-spin text-[#3867F5]" : ""}`} />
+            <RefreshCw className={`w-3.5 h-3.5 ${isVerifying ? "animate-spin text-[#09090B]" : ""}`} />
             <span>{isVerifying ? "Verifying..." : "Verify Connections"}</span>
           </button>
         </div>
 
         {/* Security Notice */}
-        <div className="p-4 rounded-xl border border-[#BFDBFE] bg-[#EFF4FF] flex items-center gap-3 text-xs text-[#1E40AF]">
-          <ShieldCheck className="w-5 h-5 text-[#3867F5] shrink-0" />
+        <div className="p-4 rounded-xl border border-[#E4E4E7] bg-[#FAFAFA] flex items-center gap-3 text-xs text-[#09090B]">
+          <ShieldCheck className="w-5 h-5 text-[#09090B] shrink-0" />
           <span>
             <strong>Zero Secret Exposure:</strong> API credentials, OAuth tokens, and Flagsmith Server Keys are stored exclusively in backend environment memory and never dispatched to the browser.
           </span>
@@ -74,17 +74,17 @@ export default function IntegrationsPage() {
           <div className="dev-card p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#EFF4FF] border border-[#BFDBFE] text-[#3867F5] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#F4F4F5] border border-[#E4E4E7] text-[#09090B] flex items-center justify-center">
                   <Flag className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-[17px] font-[600] text-[#111827]">Flagsmith Experimentation</h2>
+                    <h2 className="text-[17px] font-[600] text-[#09090B]">Flagsmith Experimentation</h2>
                     <span className="status-badge status-badge-active text-[10px]">
                       Operational
                     </span>
                   </div>
-                  <p className="text-xs text-[#64748B] mt-0.5">
+                  <p className="text-xs text-[#71717A] mt-0.5">
                     Official Flagsmith SDK evaluation and multivariate traffic assignment
                   </p>
                 </div>
@@ -101,20 +101,20 @@ export default function IntegrationsPage() {
               </a>
             </div>
 
-            <div className="p-3.5 rounded-lg bg-[#F8FAFC] border border-[#E5E7EB] text-xs font-mono-code space-y-1.5">
+            <div className="p-3.5 rounded-lg bg-[#FAFAFA] border border-[#E4E4E7] text-xs font-mono-code space-y-1.5">
               <div className="flex justify-between">
-                <span className="text-[#64748B]">Mode:</span>
-                <span className="font-semibold text-[#111827]">
+                <span className="text-[#71717A]">Mode:</span>
+                <span className="font-semibold text-[#09090B]">
                   {integrations?.flagsmith.mode === "cloud_sdk" ? "Flagsmith Cloud Edge API" : "Local Flagsmith SDK Engine (Deterministic Murmur3)"}
                 </span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#64748B]">Environment:</span>
-                <span className="text-[#16A36A] font-semibold">production-core</span>
+                <span className="text-[#71717A]">Environment:</span>
+                <span className="text-[#059669] font-semibold">production-core</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#64748B]">Multivariate Assignment:</span>
-                <span className="text-[#3867F5]">Murmur3 100-bucket stable hashing</span>
+                <span className="text-[#71717A]">Multivariate Assignment:</span>
+                <span className="text-[#09090B] font-semibold">Murmur3 100-bucket stable hashing</span>
               </div>
             </div>
           </div>
@@ -123,17 +123,17 @@ export default function IntegrationsPage() {
           <div className="dev-card p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#EFF4FF] border border-[#BFDBFE] text-[#3867F5] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#F4F4F5] border border-[#E4E4E7] text-[#09090B] flex items-center justify-center">
                   <FolderGit2 className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-[17px] font-[600] text-[#111827]">GitHub API &amp; AST Parser</h2>
+                    <h2 className="text-[17px] font-[600] text-[#09090B]">GitHub API &amp; AST Parser</h2>
                     <span className="status-badge status-badge-active text-[10px]">
                       Connected
                     </span>
                   </div>
-                  <p className="text-xs text-[#64748B] mt-0.5">
+                  <p className="text-xs text-[#71717A] mt-0.5">
                     Live branch inspection, component extraction, and commit diffing
                   </p>
                 </div>
@@ -160,23 +160,23 @@ export default function IntegrationsPage() {
           <div className="dev-card p-6 space-y-4">
             <div className="flex items-start justify-between">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#EFF4FF] border border-[#BFDBFE] text-[#3867F5] flex items-center justify-center">
+                <div className="w-10 h-10 rounded-xl bg-[#F4F4F5] border border-[#E4E4E7] text-[#09090B] flex items-center justify-center">
                   <Bot className="w-5 h-5" />
                 </div>
                 <div>
                   <div className="flex items-center gap-2">
-                    <h2 className="text-[17px] font-[600] text-[#111827]">AI Intelligence Runtime</h2>
+                    <h2 className="text-[17px] font-[600] text-[#09090B]">AI Intelligence Runtime</h2>
                     <span className="status-badge status-badge-active text-[10px]">
                       Configured
                     </span>
                   </div>
-                  <p className="text-xs text-[#64748B] mt-0.5">
+                  <p className="text-xs text-[#71717A] mt-0.5">
                     Structured tool calling, hypothesis formulation, and patch generation
                   </p>
                 </div>
               </div>
 
-              <span className="text-xs font-mono-code text-[#3867F5] font-semibold">
+              <span className="text-xs font-mono-code text-[#09090B] font-semibold">
                 {integrations?.gemini.model || "gemini-2.0-flash"}
               </span>
             </div>

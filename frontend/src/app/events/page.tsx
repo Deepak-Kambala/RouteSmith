@@ -91,10 +91,10 @@ export default function EventsPage() {
                   <td className="py-3 px-5 font-semibold text-[#111827]">{ev.id}</td>
                   <td className="py-3 px-4">
                     <span
-                      className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase ${
+                      className={`px-2 py-0.5 rounded text-[10px] font-semibold uppercase border ${
                         ev.type === "conversion"
-                          ? "bg-[#DCFCE7] text-[#16A36A]"
-                          : "bg-[#EFF4FF] text-[#3867F5]"
+                          ? "bg-[#ECFDF5] text-[#059669] border-[#A7F3D0]"
+                          : "bg-[#F4F4F5] text-[#09090B] border-[#E4E4E7]"
                       }`}
                     >
                       {ev.type}

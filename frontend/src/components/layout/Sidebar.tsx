@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         <div className="h-16 flex items-center justify-between px-4 border-b border-[#E5E7EB]">
           {!collapsed ? (
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#3867F5] flex items-center justify-center text-white font-semibold text-sm shadow-xs">
+              <div className="w-8 h-8 rounded-lg bg-[#09090B] flex items-center justify-center text-white font-semibold text-sm shadow-xs">
                 RS
               </div>
               <div className="flex flex-col">
@@ -83,7 +83,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
               </div>
             </div>
           ) : (
-            <div className="w-8 h-8 rounded-lg bg-[#3867F5] flex items-center justify-center text-white font-semibold text-sm mx-auto">
+            <div className="w-8 h-8 rounded-lg bg-[#09090B] flex items-center justify-center text-white font-semibold text-sm mx-auto">
               RS
             </div>
           )}
@@ -135,12 +135,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                       active
-                        ? "bg-[#EFF4FF] text-[#1E40AF] font-semibold"
-                        : "text-[#64748B] hover:text-[#111827] hover:bg-[#F8FAFC]"
+                        ? "bg-[#F4F4F5] text-[#09090B] font-semibold"
+                        : "text-[#71717A] hover:text-[#09090B] hover:bg-[#F4F4F5]/60"
                     }`}
                     title={collapsed ? item.label : undefined}
                   >
-                    <Icon className={`w-4 h-4 shrink-0 ${active ? "text-[#3867F5]" : "text-[#64748B]"}`} />
+                    <Icon className={`w-4 h-4 shrink-0 ${active ? "text-[#09090B]" : "text-[#71717A]"}`} />
                     {!collapsed && <span>{item.label}</span>}
                   </Link>
                 );
@@ -165,12 +165,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                     href={item.href}
                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-xs font-medium transition-all ${
                       active
-                        ? "bg-[#EFF4FF] text-[#1E40AF] font-semibold"
-                        : "text-[#64748B] hover:text-[#111827] hover:bg-[#F8FAFC]"
+                        ? "bg-[#F4F4F5] text-[#09090B] font-semibold"
+                        : "text-[#71717A] hover:text-[#09090B] hover:bg-[#F4F4F5]/60"
                     }`}
                     title={collapsed ? item.label : undefined}
                   >
-                    <Icon className={`w-4 h-4 shrink-0 ${active ? "text-[#3867F5]" : "text-[#64748B]"}`} />
+                    <Icon className={`w-4 h-4 shrink-0 ${active ? "text-[#09090B]" : "text-[#71717A]"}`} />
                     {!collapsed && <span>{item.label}</span>}
                   </Link>
                 );
@@ -192,12 +192,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 href={item.href}
                 className={`flex items-center gap-3 px-3 py-1.5 rounded-lg text-xs font-medium transition-all ${
                   active
-                    ? "bg-[#EFF4FF] text-[#1E40AF] font-semibold"
-                    : "text-[#64748B] hover:text-[#111827] hover:bg-[#F8FAFC]"
+                    ? "bg-[#F4F4F5] text-[#09090B] font-semibold"
+                    : "text-[#71717A] hover:text-[#09090B] hover:bg-[#F4F4F5]/60"
                 }`}
                 title={collapsed ? item.label : undefined}
               >
-                <Icon className="w-4 h-4 shrink-0 text-[#64748B]" />
+                <Icon className={`w-4 h-4 shrink-0 ${active ? "text-[#09090B]" : "text-[#71717A]"}`} />
                 {!collapsed && <span>{item.label}</span>}
               </Link>
             );

@@ -3,27 +3,27 @@
 @source "../../src/**/*.{js,ts,jsx,tsx,mdx}";
 
 :root {
-  --bg-primary: #F8FAFC;
+  --bg-primary: #FAFAFA;
   --bg-sidebar: #FFFFFF;
   --bg-card: #FFFFFF;
   
-  --text-primary: #111827;
-  --text-secondary: #64748B;
-  --text-muted: #94A3B8;
+  --text-primary: #09090B;
+  --text-secondary: #52525B;
+  --text-muted: #A1A1AA;
   
-  --border-subtle: #E5E7EB;
-  --border-strong: #D1D5DB;
+  --border-subtle: #E4E4E7;
+  --border-strong: #D4D4D8;
   
-  --brand-blue: #3867F5;
-  --brand-blue-hover: #2853D9;
-  --brand-blue-surface: #EFF4FF;
+  --brand-primary: #09090B;
+  --brand-primary-hover: #27272A;
+  --brand-surface: #F4F4F5;
   
-  --status-success: #16A36A;
-  --status-success-surface: #F0FDF4;
-  --status-warning: #D99725;
+  --status-success: #059669;
+  --status-success-surface: #ECFDF5;
+  --status-warning: #D97706;
   --status-warning-surface: #FFFBEB;
-  --status-danger: #DC5555;
-  --status-danger-surface: #FEF2F2;
+  --status-danger: #E11D48;
+  --status-danger-surface: #FFF1F2;
 
   --font-inter: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono: "Geist Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
@@ -45,34 +45,34 @@ body {
 .dev-card {
   background-color: var(--bg-card);
   border: 1px solid var(--border-subtle);
-  border-radius: 12px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03), 0 1px 2px rgba(0, 0, 0, 0.02);
+  border-radius: 10px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.04);
   transition: border-color 0.15s ease, box-shadow 0.15s ease;
 }
 
 .dev-card:hover {
-  border-color: #D1D5DB;
+  border-color: #D4D4D8;
 }
 
-/* Premium Developer Buttons */
+/* Premium Developer Buttons - Carbon / Obsidian Theme */
 .btn-primary {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   font-size: 13px;
   font-weight: 500;
-  height: 36px;
+  height: 34px;
   padding: 0 14px;
-  border-radius: 8px;
-  background-color: var(--brand-blue);
+  border-radius: 6px;
+  background-color: #09090B;
   color: #FFFFFF;
-  border: 1px solid transparent;
+  border: 1px solid #27272A;
   transition: background-color 0.15s ease, transform 0.05s ease;
   cursor: pointer;
 }
 
 .btn-primary:hover {
-  background-color: var(--brand-blue-hover);
+  background-color: #27272A;
 }
 
 .btn-primary:active {
@@ -85,9 +85,9 @@ body {
   justify-content: center;
   font-size: 13px;
   font-weight: 500;
-  height: 36px;
+  height: 34px;
   padding: 0 14px;
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: #FFFFFF;
   color: var(--text-primary);
   border: 1px solid var(--border-subtle);
@@ -96,8 +96,8 @@ body {
 }
 
 .btn-secondary:hover {
-  background-color: #F8FAFC;
-  border-color: #D1D5DB;
+  background-color: #F4F4F5;
+  border-color: #D4D4D8;
 }
 
 .btn-ghost {
@@ -106,9 +106,9 @@ body {
   justify-content: center;
   font-size: 13px;
   font-weight: 500;
-  height: 36px;
+  height: 34px;
   padding: 0 10px;
-  border-radius: 8px;
+  border-radius: 6px;
   background-color: transparent;
   color: var(--text-secondary);
   transition: background-color 0.15s ease, color 0.15s ease;
@@ -116,17 +116,17 @@ body {
 }
 
 .btn-ghost:hover {
-  background-color: #F1F5F9;
+  background-color: #F4F4F5;
   color: var(--text-primary);
 }
 
 /* Premium Inputs */
 .dev-input {
   width: 100%;
-  height: 36px;
+  height: 34px;
   padding: 0 12px;
   font-size: 13px;
-  border-radius: 8px;
+  border-radius: 6px;
   border: 1px solid var(--border-subtle);
   background-color: #FFFFFF;
   color: var(--text-primary);
@@ -135,8 +135,8 @@ body {
 
 .dev-input:focus {
   outline: none;
-  border-color: var(--brand-blue);
-  box-shadow: 0 0 0 3px rgba(56, 103, 245, 0.12);
+  border-color: #09090B;
+  box-shadow: 0 0 0 2px rgba(9, 9, 11, 0.08);
 }
 
 .dev-input::placeholder {
@@ -148,49 +148,48 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 2px 8px;
-  border-radius: 6px;
+  padding: 2px 7px;
+  border-radius: 4px;
   font-size: 11px;
   font-weight: 500;
 }
 
 .status-badge-active {
-  background-color: #F0FDF4;
-  color: #16A36A;
-  border: 1px solid #BBF7D0;
+  background-color: #ECFDF5;
+  color: #059669;
+  border: 1px solid #A7F3D0;
 }
 
 .status-badge-draft {
-  background-color: #F8FAFC;
-  color: #64748B;
-  border: 1px solid #E2E8F0;
+  background-color: #F4F4F5;
+  color: #71717A;
+  border: 1px solid #E4E4E7;
 }
 
 .status-badge-paused {
   background-color: #FFFBEB;
-  color: #D99725;
+  color: #D97706;
   border: 1px solid #FDE68A;
 }
 
 .status-badge-concluded {
-  background-color: #EFF4FF;
-  color: #3867F5;
-  border: 1px solid #BFDBFE;
+  background-color: #F4F4F5;
+  color: #09090B;
+  border: 1px solid #E4E4E7;
 }
 
 /* Scrollbars */
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+  width: 5px;
+  height: 5px;
 }
 ::-webkit-scrollbar-track {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #E2E8F0;
+  background: #E4E4E7;
   border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #CBD5E1;
+  background: #D4D4D8;
 }
-

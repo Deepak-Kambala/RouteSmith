@@ -243,7 +243,7 @@ export function SignupForm({ userId }: { userId: string }) {
                     ...sessions.map((s) => ({ ...s, active: false })),
                   ]);
                 }}
-                className="p-1 rounded-md text-[#3867F5] hover:bg-[#EFF4FF] transition-colors"
+                className="p-1 rounded-md text-[#09090B] hover:bg-[#F4F4F5] transition-colors"
                 title="New Session"
               >
                 <Plus className="w-4 h-4" />
@@ -260,27 +260,27 @@ export function SignupForm({ userId }: { userId: string }) {
                   }
                   className={`w-full text-left p-2 rounded-lg text-xs transition-colors flex flex-col gap-0.5 ${
                     sess.active
-                      ? "bg-[#EFF4FF] text-[#1E40AF] font-semibold"
-                      : "text-[#64748B] hover:bg-[#F8FAFC] hover:text-[#111827]"
+                      ? "bg-[#F4F4F5] text-[#09090B] font-semibold"
+                      : "text-[#71717A] hover:bg-[#FAFAFA] hover:text-[#09090B]"
                   }`}
                 >
                   <span className="truncate">{sess.title}</span>
-                  <span className="text-[10px] text-[#94A3B8] font-mono-code">{sess.time}</span>
+                  <span className="text-[10px] text-[#A1A1AA] font-mono-code">{sess.time}</span>
                 </button>
               ))}
             </div>
           </div>
 
           {/* Connected Repo Indicator */}
-          <div className="pt-3 border-t border-[#E5E7EB] text-xs">
-            <span className="text-[10px] text-[#94A3B8] uppercase tracking-wider font-semibold block mb-1">
+          <div className="pt-3 border-t border-[#E4E4E7] text-xs">
+            <span className="text-[10px] text-[#A1A1AA] uppercase tracking-wider font-semibold block mb-1">
               Connected Target
             </span>
-            <div className="p-2 rounded-lg bg-[#F8FAFC] border border-[#E5E7EB] flex items-center gap-2 truncate">
-              <FolderGit2 className="w-4 h-4 text-[#3867F5] shrink-0" />
+            <div className="p-2 rounded-lg bg-[#FAFAFA] border border-[#E4E4E7] flex items-center gap-2 truncate">
+              <FolderGit2 className="w-4 h-4 text-[#09090B] shrink-0" />
               <div className="truncate">
-                <div className="text-xs font-semibold text-[#111827] truncate">RouteSmith</div>
-                <div className="text-[10px] text-[#64748B] font-mono-code truncate">branch: main</div>
+                <div className="text-xs font-semibold text-[#09090B] truncate">RouteSmith</div>
+                <div className="text-[10px] text-[#71717A] font-mono-code truncate">branch: main</div>
               </div>
             </div>
           </div>
@@ -289,17 +289,17 @@ export function SignupForm({ userId }: { userId: string }) {
         {/* CENTER COLUMN: Interactive Chat & Tool Executions (Flex 1) */}
         <div className="flex-1 dev-card flex flex-col justify-between overflow-hidden">
           {/* Header */}
-          <div className="p-3.5 border-b border-[#E5E7EB] flex items-center justify-between bg-[#F8FAFC]">
+          <div className="p-3.5 border-b border-[#E4E4E7] flex items-center justify-between bg-[#FAFAFA]">
             <div className="flex items-center gap-2">
-              <div className="w-6 h-6 rounded-md bg-[#3867F5] text-white flex items-center justify-center">
+              <div className="w-6 h-6 rounded-md bg-[#09090B] text-white flex items-center justify-center">
                 <Bot className="w-3.5 h-3.5" />
               </div>
-              <span className="text-xs font-semibold text-[#111827]">
+              <span className="text-xs font-semibold text-[#09090B]">
                 AI Agent
               </span>
             </div>
-            <span className="text-[11px] font-mono-code text-[#16A36A] flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#16A36A]"></span>
+            <span className="text-[11px] font-mono-code text-[#059669] flex items-center gap-1.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#059669]"></span>
               Active
             </span>
           </div>
@@ -312,7 +312,7 @@ export function SignupForm({ userId }: { userId: string }) {
                 className={`flex gap-3 text-xs ${msg.sender === "user" ? "justify-end" : "justify-start"}`}
               >
                 {msg.sender === "agent" && (
-                  <div className="w-7 h-7 rounded-lg bg-[#EFF4FF] border border-[#BFDBFE] text-[#3867F5] flex items-center justify-center shrink-0">
+                  <div className="w-7 h-7 rounded-lg bg-[#F4F4F5] border border-[#E4E4E7] text-[#09090B] flex items-center justify-center shrink-0">
                     <Bot className="w-4 h-4" />
                   </div>
                 )}
@@ -320,20 +320,20 @@ export function SignupForm({ userId }: { userId: string }) {
                 <div
                   className={`max-w-[85%] space-y-3 ${
                     msg.sender === "user"
-                      ? "p-3 rounded-xl bg-[#3867F5] text-white"
-                      : "p-4 rounded-xl bg-[#F8FAFC] border border-[#E5E7EB] text-[#111827]"
+                      ? "p-3 rounded-xl bg-[#09090B] text-white"
+                      : "p-4 rounded-xl bg-[#FAFAFA] border border-[#E4E4E7] text-[#09090B]"
                   }`}
                 >
                   <p className="leading-relaxed">{msg.content}</p>
 
                   {/* Concise Reasoning Summary */}
                   {msg.reasoning_summary && (
-                    <div className="p-2.5 rounded-lg bg-[#EFF4FF] border border-[#BFDBFE] text-[11px] text-[#1E40AF] space-y-1">
+                    <div className="p-2.5 rounded-lg bg-[#F4F4F5] border border-[#E4E4E7] text-[11px] text-[#09090B] space-y-1">
                       <div className="font-semibold flex items-center gap-1.5">
-                        <Sparkles className="w-3 h-3 text-[#3867F5]" />
+                        <Sparkles className="w-3 h-3 text-[#09090B]" />
                         <span>Agent Reasoning Summary</span>
                       </div>
-                      <p className="leading-relaxed">{msg.reasoning_summary}</p>
+                      <p className="leading-relaxed text-[#52525B]">{msg.reasoning_summary}</p>
                     </div>
                   )}
 
@@ -357,7 +357,7 @@ export function SignupForm({ userId }: { userId: string }) {
                                 <ShieldAlert className="w-3.5 h-3.5 text-[#D99725] shrink-0" />
                               )}
                               {tool.status === "running" && (
-                                <Clock className="w-3.5 h-3.5 text-[#3867F5] animate-spin shrink-0" />
+                                <Clock className="w-3.5 h-3.5 text-[#09090B] animate-spin shrink-0" />
                               )}
                               {tool.status === "failed" && (
                                 <XCircle className="w-3.5 h-3.5 text-[#DC5555] shrink-0" />
@@ -389,11 +389,11 @@ export function SignupForm({ userId }: { userId: string }) {
                   {msg.code_diff && (
                     <div className="space-y-2 pt-2">
                       <div className="flex items-center justify-between text-xs font-mono-code">
-                        <span className="font-semibold text-[#111827] flex items-center gap-1.5">
-                          <Code2 className="w-3.5 h-3.5 text-[#3867F5]" />
+                        <span className="font-semibold text-[#09090B] flex items-center gap-1.5">
+                          <Code2 className="w-3.5 h-3.5 text-[#09090B]" />
                           <span>{msg.code_diff.file_path}</span>
                         </span>
-                        <span className="text-[10px] text-[#64748B]">Synthesized Patch</span>
+                        <span className="text-[10px] text-[#71717A]">Synthesized Patch</span>
                       </div>
 
                       <div className="rounded-lg bg-[#111827] p-3 text-xs font-mono-code text-[#E5E7EB] overflow-x-auto max-h-56">
@@ -478,15 +478,15 @@ export function SignupForm({ userId }: { userId: string }) {
                 <span className="font-semibold text-[#111827]">TypeScript + Python</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-[#64748B]">Commit Cache:</span>
-                <span className="font-mono-code font-semibold text-[#3867F5]">11157e5</span>
+                <span className="text-[#71717A]">Commit Cache:</span>
+                <span className="font-mono-code font-semibold text-[#09090B]">11157e5</span>
               </div>
             </div>
           </div>
 
           {/* Detected Components Tree */}
           <div className="space-y-2">
-            <h3 className="text-xs font-semibold text-[#111827] uppercase tracking-wider">
+            <h3 className="text-xs font-semibold text-[#09090B] uppercase tracking-wider">
               Detected AST Components
             </h3>
             <div className="space-y-1 text-xs">
@@ -500,15 +500,15 @@ export function SignupForm({ userId }: { userId: string }) {
                   key={comp.name}
                   className={`p-2 rounded-lg border flex items-center justify-between text-xs ${
                     comp.active
-                      ? "bg-[#EFF4FF] border-[#BFDBFE] text-[#1E40AF] font-medium"
-                      : "bg-white border-[#E5E7EB] text-[#64748B]"
+                      ? "bg-[#FAFAFA] border-[#09090B] text-[#09090B] font-medium"
+                      : "bg-white border-[#E4E4E7] text-[#71717A]"
                   }`}
                 >
                   <div className="truncate">
                     <div className="font-semibold truncate">{comp.name}</div>
-                    <div className="text-[10px] text-[#94A3B8] font-mono-code truncate">{comp.path}</div>
+                    <div className="text-[10px] text-[#A1A1AA] font-mono-code truncate">{comp.path}</div>
                   </div>
-                  {comp.active && <span className="w-1.5 h-1.5 rounded-full bg-[#3867F5]"></span>}
+                  {comp.active && <span className="w-1.5 h-1.5 rounded-full bg-[#09090B]"></span>}
                 </div>
               ))}
             </div>
