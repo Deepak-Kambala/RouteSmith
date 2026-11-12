@@ -1,6 +1,19 @@
 import os
+from pathlib import Path
 from pydantic import BaseModel
 from typing import Optional
+from dotenv import load_dotenv
+
+# Automatically locate and load root or local .env file
+root_env = Path(__file__).resolve().parent.parent.parent / ".env"
+local_env = Path(__file__).resolve().parent.parent / ".env"
+
+if root_env.exists():
+    load_dotenv(dotenv_path=root_env)
+elif local_env.exists():
+    load_dotenv(dotenv_path=local_env)
+else:
+    load_dotenv()
 
 class Settings(BaseModel):
     # App
