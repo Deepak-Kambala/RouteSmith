@@ -135,6 +135,42 @@ def get_integrations():
         }
     }
 
+class AgentChatRequest(BaseModel):
+    message: str
+    repository: Optional[str] = "Deepak-Kambala/RouteSmith"
+
+class ExperimentProposeRequest(BaseModel):
+    objective: str
+    repository: Optional[str] = "Deepak-Kambala/RouteSmith"
+
+@app.post("/api/agent/chat")
+async def agent_chat(req: AgentChatRequest):
+    result = await agent_orchestrator.chat(user_goal=req.message, repo=req.repository)
+    return result
+
+@app.post("/api/experiments/propose")
+async def propose_experiment(req: ExperimentProposeRequest):
+    result = await agent_orchestrator.chat(user_goal=req.objective, repo=req.repository)
+    return {
+        "name": f"A/B Test: {req.objective[:40]}",
+        "hypothesis": result.get("reasoning_summary", "Optimizing the component lowers drop-off and drives higher conversion."),
+        "control_variant": {
+            "name": "Variant A (Control)",
+            "description": "Existing baseline implementation with standard inputs and layout."
+        },
+        "treatment_variant": {
+            "name": "Variant B (Treatment)",
+            "description": result.get("reasoning_summary", "Streamlined treatment variation with reduced friction.")
+        },
+        "primary_metric": "conversion_success",
+        "secondary_metrics": "dwell_time_seconds, click_through_rate",
+        "target_audience": "100% eligible traffic (50/50 split)",
+        "potential_risks": "Requires monitoring initial downstream event telemetry.",
+        "suggested_duration": "14 days",
+        "feature_flag_key": result.get("flag_key", "exp_feature_flag"),
+        "code_diff": result.get("code_diff")
+    }
+
 @app.post("/api/agent/tools/execute")
 async def execute_agent_tool(req: ToolExecutionRequest):
     result = await agent_orchestrator.execute_tool(req.tool_name, req.params)

@@ -53,19 +53,31 @@ export default function DemoSignupPage() {
     handleRerollSession();
   }, []);
 
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
   const handleRerollSession = async () => {
     const freshId = `usr_${Math.random().toString(36).substring(2, 8)}`;
     setParticipantId(freshId);
 
-    // Hash-based deterministic assignment: murmur3 simulated via char code sum
-    const charSum = freshId.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
-    const assignedVariant: "control" | "treatment" = charSum % 2 === 0 ? "treatment" : "control";
+    // Live Flagsmith Edge Flag Evaluation
+    let assignedVariant: "control" | "treatment" = "control";
+    try {
+      const evalRes = await fetch(`${BACKEND_URL}/api/flags/evaluate?identifier=${freshId}&flag_key=signup_form_simplification`);
+      if (evalRes.ok) {
+        const flagData = await evalRes.json();
+        assignedVariant = flagData.assigned_variant === "treatment" ? "treatment" : "control";
+      }
+    } catch {
+      const charSum = freshId.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0);
+      assignedVariant = charSum % 2 === 0 ? "treatment" : "control";
+    }
+
     setSelectedVariant(assignedVariant);
     setHasConverted(false);
     setExposureTracked(true);
 
-    // Record exposure event
-    const expResult = await trackDemoEvent("exp_signup_v2", assignedVariant, "exposure", freshId);
+    // Record exposure event in live backend / Supabase
+    await trackDemoEvent("exp_signup_v2", assignedVariant, "exposure", freshId);
     setSessionEvents([
       {
         id: `ev_${Date.now()}`,

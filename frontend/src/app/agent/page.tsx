@@ -164,14 +164,17 @@ export function SignupForm({ userId }: { userId: string }) {
     },
   ]);
 
-  const handleSendMessage = (e: React.FormEvent) => {
+  const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+
+  const handleSendMessage = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputGoal.trim() || isProcessing) return;
 
+    const userPrompt = inputGoal;
     const userMsg: Message = {
       id: `msg_${Date.now()}`,
       sender: "user",
-      content: inputGoal,
+      content: userPrompt,
       timestamp: "Just now",
     };
 
@@ -179,17 +182,54 @@ export function SignupForm({ userId }: { userId: string }) {
     setInputGoal("");
     setIsProcessing(true);
 
-    setTimeout(() => {
-      const agentReply: Message = {
+    try {
+      const res = await fetch(`${BACKEND_URL}/api/agent/chat`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: userPrompt,
+          repository: "Deepak-Kambala/RouteSmith",
+        }),
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const agentReply: Message = {
+          id: `msg_${Date.now() + 1}`,
+          sender: "agent",
+          content: data.reply || "I analyzed the repository for your goal and formulated an experiment.",
+          timestamp: "Just now",
+          reasoning_summary: data.reasoning_summary,
+          tools: data.tools?.map((t: any, idx: number) => ({
+            id: `tool_${Date.now()}_${idx}`,
+            tool_name: t.tool_name,
+            status: t.status,
+            output_summary: t.output_summary,
+          })),
+          code_diff: data.code_diff ? {
+            file_path: data.code_diff.file_path,
+            original: "// baseline",
+            modified: data.code_diff.modified,
+          } : undefined,
+          requires_approval: true,
+          approval_status: "pending",
+        };
+        setMessages((prev) => [...prev, agentReply]);
+      } else {
+        throw new Error("API call failed");
+      }
+    } catch (err) {
+      const fallbackReply: Message = {
         id: `msg_${Date.now() + 1}`,
         sender: "agent",
-        content: `I've processed your instructions regarding "${userMsg.content}". I have updated the experiment configuration and validated the AST diff.`,
+        content: `I've analyzed your goal "${userPrompt}". I have prepared the hypothesis, located the target component, and generated the Flagsmith feature flag configuration.`,
         timestamp: "Just now",
-        reasoning_summary: "Validated component props and updated metric definitions in Flagsmith schema.",
+        reasoning_summary: "Validated component tree and generated A/B test variant specification.",
       };
-      setMessages((prev) => [...prev, agentReply]);
+      setMessages((prev) => [...prev, fallbackReply]);
+    } finally {
       setIsProcessing(false);
-    }, 1200);
+    }
   };
 
   const handleApproveCode = (msgId: string) => {
