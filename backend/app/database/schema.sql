@@ -153,3 +153,4 @@ CREATE INDEX IF NOT EXISTS idx_participants_exp ON experiment_participants(exper
 CREATE INDEX IF NOT EXISTS idx_events_exp ON experiment_events(experiment_id);
 CREATE INDEX IF NOT EXISTS idx_events_created ON experiment_events(created_at);
 CREATE INDEX IF NOT EXISTS idx_analyses_commit ON repository_analyses(repository_id, commit_hash);
+

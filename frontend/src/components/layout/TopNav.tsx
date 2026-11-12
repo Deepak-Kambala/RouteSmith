@@ -119,3 +119,4 @@ export const TopNav: React.FC<TopNavProps> = ({ onOpenMobileMenu }) => {
     </header>
   );
 };
+

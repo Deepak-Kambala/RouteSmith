@@ -44,3 +44,4 @@ await flagsmith.init({
     </AppShell>
   );
 }
+

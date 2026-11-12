@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../**/*.{js,ts,jsx,tsx,mdx}";
+@source "../../src/**/*.{js,ts,jsx,tsx,mdx}";
 
 :root {
   --bg-primary: #F8FAFC;
@@ -191,3 +193,4 @@ body {
 ::-webkit-scrollbar-thumb:hover {
   background: #CBD5E1;
 }
+

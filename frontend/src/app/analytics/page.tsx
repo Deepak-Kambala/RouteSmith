@@ -25,7 +25,12 @@ import {
 } from "recharts";
 
 export default function AnalyticsPage() {
+  const [mounted, setMounted] = useState(false);
   const [dateRange, setDateRange] = useState("Last 14 Days");
+
+  React.useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const trendData = [
     { day: "Day 01", control: 11.8, treatment: 16.4 },
@@ -114,38 +119,42 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="h-[280px] w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                <XAxis dataKey="day" stroke="#94A3B8" fontSize={12} tickLine={false} />
-                <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} unit="%" />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: "8px",
-                    border: "1px solid #E5E7EB",
-                    fontSize: "12px",
-                  }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="treatment"
-                  name="Variant B (Treatment)"
-                  stroke="#16A36A"
-                  strokeWidth={2.5}
-                  dot={{ r: 3, fill: "#16A36A" }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="control"
-                  name="Variant A (Control)"
-                  stroke="#64748B"
-                  strokeWidth={2}
-                  strokeDasharray="4 4"
-                  dot={{ r: 2, fill: "#64748B" }}
-                />
-              </LineChart>
-            </ResponsiveContainer>
+            {mounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                  <XAxis dataKey="day" stroke="#94A3B8" fontSize={12} tickLine={false} />
+                  <YAxis stroke="#94A3B8" fontSize={12} tickLine={false} unit="%" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: "8px",
+                      border: "1px solid #E5E7EB",
+                      fontSize: "12px",
+                    }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="treatment"
+                    name="Variant B (Treatment)"
+                    stroke="#16A36A"
+                    strokeWidth={2.5}
+                    dot={{ r: 3, fill: "#16A36A" }}
+                  />
+                  <Line
+                    type="monotone"
+                    dataKey="control"
+                    name="Variant A (Control)"
+                    stroke="#64748B"
+                    strokeWidth={2}
+                    strokeDasharray="4 4"
+                    dot={{ r: 2, fill: "#64748B" }}
+                  />
+                </LineChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full w-full bg-[#F8FAFC] rounded-lg animate-pulse" />
+            )}
           </div>
         </div>
 
@@ -161,29 +170,34 @@ export default function AnalyticsPage() {
           </div>
 
           <div className="h-[260px] w-full pt-2">
-            <ResponsiveContainer width="100%" height="100%">
-              <BarChart
-                data={variantComparisonData}
-                layout="vertical"
-                margin={{ top: 5, right: 20, left: 80, bottom: 5 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" horizontal={false} />
-                <XAxis type="number" stroke="#94A3B8" fontSize={12} unit="%" />
-                <YAxis dataKey="name" type="category" stroke="#111827" fontSize={11} tickLine={false} />
-                <Tooltip
-                  contentStyle={{
-                    backgroundColor: "#FFFFFF",
-                    borderRadius: "8px",
-                    border: "1px solid #E5E7EB",
-                    fontSize: "12px",
-                  }}
-                />
-                <Bar dataKey="rate" name="Conversion Rate" fill="#3867F5" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+            {mounted ? (
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={variantComparisonData}
+                  layout="vertical"
+                  margin={{ top: 5, right: 20, left: 80, bottom: 5 }}
+                >
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" horizontal={false} />
+                  <XAxis type="number" stroke="#94A3B8" fontSize={12} unit="%" />
+                  <YAxis dataKey="name" type="category" stroke="#111827" fontSize={11} tickLine={false} />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "#FFFFFF",
+                      borderRadius: "8px",
+                      border: "1px solid #E5E7EB",
+                      fontSize: "12px",
+                    }}
+                  />
+                  <Bar dataKey="rate" name="Conversion Rate" fill="#3867F5" radius={[0, 4, 4, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-full w-full bg-[#F8FAFC] rounded-lg animate-pulse" />
+            )}
           </div>
         </div>
       </div>
     </AppShell>
   );
 }
+

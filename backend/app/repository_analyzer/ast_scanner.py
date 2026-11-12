@@ -101,3 +101,4 @@ class RepositoryScanner:
         return analysis_result
 
 repo_scanner = RepositoryScanner()
+

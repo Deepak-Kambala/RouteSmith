@@ -34,6 +34,7 @@ import {
 } from "recharts";
 
 export default function DashboardPage() {
+  const [mounted, setMounted] = useState(false);
   const [data, setData] = useState<{
     active_experiments_count: number;
     total_participants_count: number;
@@ -47,6 +48,7 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setMounted(true);
     loadDashboard();
   }, []);
 
@@ -208,52 +210,56 @@ export default function DashboardPage() {
             </div>
 
             <div className="h-[260px] w-full pt-2">
-              <ResponsiveContainer width="100%" height="100%">
-                <LineChart
-                  data={data?.activity_series || []}
-                  margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
-                  <XAxis
-                    dataKey="date"
-                    stroke="#94A3B8"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={{ stroke: "#E5E7EB" }}
-                  />
-                  <YAxis
-                    stroke="#94A3B8"
-                    fontSize={12}
-                    tickLine={false}
-                    axisLine={false}
-                  />
-                  <Tooltip
-                    contentStyle={{
-                      backgroundColor: "#FFFFFF",
-                      borderRadius: "8px",
-                      border: "1px solid #E5E7EB",
-                      fontSize: "12px",
-                      boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
-                    }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="exposures"
-                    stroke="#3867F5"
-                    strokeWidth={2}
-                    dot={{ fill: "#3867F5", r: 3 }}
-                    activeDot={{ r: 5 }}
-                  />
-                  <Line
-                    type="monotone"
-                    dataKey="conversions"
-                    stroke="#16A36A"
-                    strokeWidth={2}
-                    dot={{ fill: "#16A36A", r: 3 }}
-                    activeDot={{ r: 5 }}
-                  />
-                </LineChart>
-              </ResponsiveContainer>
+              {mounted ? (
+                <ResponsiveContainer width="100%" height="100%">
+                  <LineChart
+                    data={data?.activity_series || []}
+                    margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
+                  >
+                    <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" vertical={false} />
+                    <XAxis
+                      dataKey="date"
+                      stroke="#94A3B8"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={{ stroke: "#E5E7EB" }}
+                    />
+                    <YAxis
+                      stroke="#94A3B8"
+                      fontSize={12}
+                      tickLine={false}
+                      axisLine={false}
+                    />
+                    <Tooltip
+                      contentStyle={{
+                        backgroundColor: "#FFFFFF",
+                        borderRadius: "8px",
+                        border: "1px solid #E5E7EB",
+                        fontSize: "12px",
+                        boxShadow: "0 2px 4px rgba(0,0,0,0.04)",
+                      }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="exposures"
+                      stroke="#3867F5"
+                      strokeWidth={2}
+                      dot={{ fill: "#3867F5", r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                    <Line
+                      type="monotone"
+                      dataKey="conversions"
+                      stroke="#16A36A"
+                      strokeWidth={2}
+                      dot={{ fill: "#16A36A", r: 3 }}
+                      activeDot={{ r: 5 }}
+                    />
+                  </LineChart>
+                </ResponsiveContainer>
+              ) : (
+                <div className="h-full w-full bg-[#F8FAFC] rounded-lg animate-pulse" />
+              )}
             </div>
           </div>
 
@@ -413,3 +419,4 @@ export default function DashboardPage() {
     </AppShell>
   );
 }
+
