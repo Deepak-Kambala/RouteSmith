@@ -3,12 +3,14 @@
 @source "../../src/**/*.{js,ts,jsx,tsx,mdx}";
 
 :root {
-  --bg-canvas: #07080C;
-  --bg-panel: #0D0F17;
-  --border-hairline: #1C2030;
+  --bg-canvas: #090A0F;
+  --bg-panel: #111319;
+  --bg-panel-sub: #0D0E14;
+  --border-subtle: #1C202C;
+  --border-focus: #2E364A;
   
-  --color-bm25: #F59E0B;
-  --color-dense: #06B6D4;
+  --color-bm25: #D99B26;
+  --color-dense: #38BDF8;
   --color-rrf: #10B981;
   --color-killswitch: #F43F5E;
   
@@ -18,35 +20,37 @@
 
 body {
   background-color: var(--bg-canvas);
-  color: #F1F5F9;
+  color: #E2E8F0;
   font-family: var(--font-inter);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Swiss Industrial Dot-Matrix Canvas */
-.dot-matrix-bg {
-  background-color: #07080C;
-  background-image: radial-gradient(#1E2230 1px, transparent 1px);
-  background-size: 16px 16px;
+/* Modern Industrial Precision Grid Canvas (Subtle, non-distracting) */
+.engineering-canvas {
+  background-color: #090A0F;
+  background-image: 
+    linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+  background-size: 32px 32px;
 }
 
-/* Tactile Matte Bento Panel with hairline border and top specular edge */
+/* Linear/Vercel-style Matte Panel with crisp hairline borders */
 .bento-panel {
-  background-color: #0D0F17;
-  border: 1px solid #1C2030;
+  background-color: #111319;
+  border: 1px solid #1C202C;
   border-radius: 6px;
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
   position: relative;
 }
 
-/* Acrylic Glassmorphism HUD Pill */
-.acrylic-hud {
-  background: rgba(19, 23, 36, 0.80);
+/* Telemetry Micro-HUD */
+.telemetry-hud {
+  background: rgba(17, 19, 25, 0.85);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.10);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.55);
+  border: 1px solid #232838;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
 }
 
 /* Monospace telemetry styling */
@@ -55,7 +59,7 @@ body {
   font-feature-settings: "tnum" 1, "zero" 1;
 }
 
-/* Custom micro-scrollbars for dense panels */
+/* Precision micro-scrollbars */
 ::-webkit-scrollbar {
   width: 4px;
   height: 4px;
@@ -64,9 +68,9 @@ body {
   background: transparent;
 }
 ::-webkit-scrollbar-thumb {
-  background: #1C2030;
+  background: #232838;
   border-radius: 2px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2D3348;
+  background: #333A50;
 }
