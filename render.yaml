@@ -1,0 +1,27 @@
+services:
+  - type: web
+    name: searchforge-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.9
+      - key: FLAGSMITH_ENVIRONMENT_KEY
+        value: ser.mJKo2C5Ntno6KcXwXvRmDY
+
+  - type: web
+    name: searchforge-frontend
+    env: node
+    rootDir: frontend
+    buildCommand: npm install && npx @tailwindcss/cli -i src/app/globals.css -o src/app/tailwind.css && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_VERSION
+        value: 20.x
+      - key: NEXT_PUBLIC_BACKEND_URL
+        fromService:
+          type: web
+          name: searchforge-backend
+          property: host
