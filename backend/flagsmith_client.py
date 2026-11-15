@@ -8,6 +8,11 @@ identity trait evaluation, remote config extraction, and kill-switch state.
 import os
 import hashlib
 from typing import Dict, Any, Optional
+from dotenv import load_dotenv
+
+# Load .env file from project root or backend
+load_dotenv()
+load_dotenv("../.env")
 
 class FlagsmithService:
     def __init__(self, environment_key: Optional[str] = None):
@@ -113,7 +118,7 @@ class FlagsmithService:
                 # Check ranking variant in live Flagsmith
                 if "retrieval_ranking_engine" in flags_by_name:
                     flag_obj = flags_by_name["retrieval_ranking_engine"]
-                    val = flag_obj.state_value
+                    val = flag_obj.value if hasattr(flag_obj, "value") else identity_flags.get_feature_value("retrieval_ranking_engine")
                     if val in ["lexical_bm25", "semantic_dense", "hybrid_rrf"]:
                         variant = val
                         assignment_source = "live_flagsmith_edge"
@@ -137,7 +142,7 @@ class FlagsmithService:
                 for param in remote_config.keys():
                     cfg_key = f"retrieval_ranking_engine_{param}"
                     if cfg_key in flags_by_name:
-                        raw_val = flags_by_name[cfg_key].state_value
+                        raw_val = flags_by_name[cfg_key].value if hasattr(flags_by_name[cfg_key], "value") else identity_flags.get_feature_value(cfg_key)
                         if raw_val is not None:
                             try:
                                 remote_config[param] = float(raw_val)
