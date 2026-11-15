@@ -4,6 +4,11 @@ import "./tailwind.css";
 export const metadata: Metadata = {
   title: "SearchForge // Flagsmith Bayesian Bench",
   description: "Zero-API-cost, real-time Hybrid Search & RRF Bayesian Experimentation Workbench powered by Flagsmith.",
+  icons: {
+    icon: "/brand/searchforge-icon.png",
+    shortcut: "/brand/searchforge-icon.png",
+    apple: "/brand/searchforge-icon.png",
+  },
 };
 
 export default function RootLayout({
@@ -21,7 +26,7 @@ export default function RootLayout({
           rel="stylesheet"
         />
       </head>
-      <body className="h-screen w-screen overflow-hidden bg-[#07080C] text-slate-100 dot-matrix-bg select-none">
+      <body className="h-screen w-screen overflow-hidden bg-[#090A0F] text-slate-200 engineering-canvas select-none">
         {children}
       </body>
     </html>

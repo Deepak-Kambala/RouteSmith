@@ -312,15 +312,17 @@ export default function SearchForgeDashboard() {
         {/* Left: Brand + Status Pill + Key Modal Trigger */}
         <div className="flex items-center gap-3">
           <div className="flex items-center gap-2.5">
-            <div className="w-6 h-6 rounded bg-emerald-500/10 border border-emerald-500/25 flex items-center justify-center text-emerald-400">
-              <Zap className="w-3.5 h-3.5" />
-            </div>
-            <div className="flex flex-col">
-              <span className="text-xs font-semibold tracking-wider text-slate-100 font-mono">
-                SEARCHFORGE
+            <img
+              src="/brand/searchforge-icon.png"
+              alt="SearchForge"
+              className="w-7 h-6 object-contain shrink-0"
+            />
+            <div className="flex items-baseline gap-1.5">
+              <span className="text-sm font-bold tracking-tight text-slate-100 font-mono">
+                Search<span className="text-[#37ECA5]">Forge</span>
               </span>
-              <span className="text-[9px] font-mono text-slate-500 tracking-wide uppercase">
-                Flagsmith Bayesian Bench
+              <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider hidden xl:inline">
+                // Flagsmith Bayesian Bench
               </span>
             </div>
           </div>
