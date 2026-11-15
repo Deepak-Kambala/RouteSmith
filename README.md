@@ -1,107 +1,122 @@
-# SearchForge // Flagsmith Bayesian Bench
+# SearchForge // Flagsmith Experimentation Workbench (Track 01)
 
-> **Zero-API-cost, real-time Hybrid Search & Reciprocal Rank Fusion (RRF) Bayesian Experimentation Workbench powered by Flagsmith.**
-
-SearchForge is a production-grade developer tool designed for evaluating, experimenting with, and statistically validating hybrid search retrieval engines. It demonstrates how engineering teams can use **Flagsmith Feature Flags & Remote Config** to safely deploy, benchmark, and optimize multiple search algorithms (`lexical_bm25`, `semantic_dense`, and `hybrid_rrf`) with zero external API fees, sub-5ms CPU latency, and real-time Bayesian decision theory.
-
----
-
-## 1. Architectural Principles & Anti-Bloat Scope
-
-- **Zero-API-Cost & Sub-5ms Local Execution:** 100% local CPU execution. No paid external LLM APIs, no heavy embedding model downloads, and no external vector databases.
-- **In-Memory 40-Doc Developer Corpus:** Rich developer documentation covering Flagsmith SDKs, remote config, segment overrides, and distributed systems patterns.
-- **Zero-Scroll Single Viewport (`100vw x 100vh`):** Locked desktop layout specifically engineered to be recorded side-by-side (65% width) next to the official Flagsmith Dashboard (35% width) in a 3-minute hackathon demo video.
+> **"Which ranking strategy helps developers find and use the right documentation?"**
+>
+> An experimentation workbench that compares Lexical BM25, Semantic Search, and Hybrid RRF behind Flagsmith feature flags, strictly distinguishing offline retrieval evaluation from user A/B experimentation.
 
 ---
 
-## 2. Visual Design System ("Swiss Industrial Telemetry + Micro-Glass")
+## 1. Problem Statement & Intended User
 
-Inspired by Linear, Vercel Observability, and Raycast:
+Developers building with complex frameworks and SDKs rely heavily on documentation search. When search fails, engineering velocity slows, support tickets rise, and users bounce.
 
-- **Base Canvas:** Deep Carbon Obsidian (`#07080C`) with a radial dot-matrix pattern (`radial-gradient(#1E2230 1px, transparent 1px)` at `16px` intervals).
-- **Primary Bento Panels:** Tactile matte `#0D0F17` surfaces with `1px solid #1C2030` exposed structural hairline borders and a top specular highlight (`shadow-[inset_0_1px_0_0_rgba(255,255,255,0.06)]`).
-- **Floating HUD & Pill Inspector:** Acrylic glassmorphism (`bg-[#131724]/80 backdrop-blur-md border border-white/10`).
-- **Strict Semantic Color Encoding:**
-  - **Control (`lexical_bm25`):** Amber Gold (`#F59E0B`, `bg-amber-500/10 text-amber-400 border-amber-500/30`)
-  - **Variant B (`semantic_dense`):** Cyan Electric (`#06B6D4`, `bg-cyan-500/10 text-cyan-400 border-cyan-500/30`)
-  - **Variant C (`hybrid_rrf` - The Winner):** Emerald Matrix (`#10B981`, `bg-emerald-500/10 text-emerald-400 border-emerald-500/30`)
-  - **Kill-Switch Fallback (`force_lexical_fallback`):** Crimson Pulse (`#F43F5E`, pulsing border `border-rose-500/60 bg-rose-950/30`)
+Search infrastructure teams are stuck choosing between:
+1. **Lexical Search (BM25Okapi):** Fast and precise for exact method names, error codes, and flags (`get_identity_flags`), but blind to conceptual phrasing.
+2. **Dense Semantic Search:** Captures high-level intent, but hallucinates or drops exact function names and introduces latency risks.
+3. **Hybrid Reciprocal Rank Fusion (RRF):** Blends both, but deploying it without experimentation risks degrading search quality and breaking latency SLAs.
+
+**SearchForge** is designed for **Search, ML, and Platform Engineers** who want to evaluate, test, and safely roll out new search ranking strategies using **Flagsmith Feature Flags, Remote Config, and Bayesian Experimentation** without external API costs or uncontrolled production risks.
 
 ---
 
-## 3. The 4-Quadrant Viewport Architecture
+## 2. Core Question, Hypothesis & Metrics
 
-```
-+-----------------------------------------------------------------------------------------------+
-|  ⚡ SEARCHFORGE // FLAGSMITH BAYESIAN BENCH   [LIVE: Flagsmith Edge]  [Remote Config HUD]  [Kill-Switch]  |
-+-------------------------------------------------------+---------------------------------------+
-| QUADRANT 1: QUERY & TRAIT INSPECTOR (5 cols, 42% H)   | QUADRANT 3: BAYESIAN EXPERIMENT ARENA  |
-| - High-contrast search input with ⌘K & CPU latency   | - Primary CTA: Stream 150 Queries     |
-| - 4 One-click demo preset chips                       | - 3-Variant Bayesian comparison matrix |
-| - Flagsmith identity & trait JSON inspector card      | - Live 95% Credible Interval Beta plot|
-|                                                       | - 🏆 Statistical Winner Alert Banner   |
-+-------------------------------------------------------+---------------------------------------+
-| QUADRANT 2: TRI-PIPELINE RANK DIFF (5 cols, 58% H)    | QUADRANT 4: LIVE TELEMETRY STREAM      |
-| - Top 3 retrieved documentation chunk cards           | - Vercel/Datadog-style live tail      |
-| - Rank Fusion Equation: [BM25:#4]+[Dense:#2]->[RRF:#1]| - Single-line telemetry with badges   |
-| - Lexical vs Dense contribution horizontal bar        | - Real-time HIT/MISS & event logging  |
-| - Copy Code Snippet (Fires Conversion Event)          |                                       |
-+-------------------------------------------------------+---------------------------------------+
-```
+### The Core Question
+> **“Which ranking strategy helps developers find and use the right documentation?”**
+
+### The Hypothesis
+> Serving Hybrid Reciprocal Rank Fusion (RRF) ranking increases the proportion of search sessions where developers find and copy code snippets compared to baseline Lexical BM25.
+
+### Primary Metric: Snippet Copy Rate
+$$\text{Snippet Copy Rate} = \frac{\text{Unique Exposed Sessions with } \ge 1 \text{ Snippet Copy}}{\text{Total Unique Exposed Search Sessions}}$$
+
+> [!IMPORTANT]
+> **Metric Limitation Notice:** In developer documentation, copying a code snippet is an observable **proxy for usefulness** (the user found code worth integrating), **not definitive proof** that the user successfully completed their underlying task without bugs.
 
 ---
 
-## 4. Mathematical & Algorithmic Foundation
+## 3. Dual-Mode Architecture: Strictly Decoupled Evidence
 
-### A. BM25Okapi (Lexical Engine)
-Evaluates exact term frequency and document length saturation:
-$$\text{Score}_{\text{BM25}}(D, Q) = \sum_{q \in Q} \text{IDF}(q) \cdot \frac{f(q, D) \cdot (k_1 + 1)}{f(q, D) + k_1 \cdot \left(1 - b + b \cdot \frac{|D|}{\text{avgdl}}\right)}$$
-*Parameters: $k_1 = 1.5, b = 0.75$.*
+SearchForge maintains an uncompromising separation between offline benchmark evidence and user experiment evidence:
 
-### B. Dense Semantic Vector Search (CPU SVD)
-Calculates TF-IDF over word and character 1-2 n-grams, projected into a 32-dimensional latent semantic space via `TruncatedSVD(n_components=32)`, unit-normalized ($\|v\|_2 = 1$), and evaluated via dot product cosine similarity in $<2\text{ms}$.
-
-### C. Reciprocal Rank Fusion (RRF) with Remote Config
-Fuses independent ordinal ranking pipelines without requiring score calibration:
-$$\text{RRF Score}(d) = \frac{\alpha}{\text{rrf\_k} + r_{\text{bm25}}(d)} + \frac{(1 - \alpha) \cdot \text{code\_boost}}{\text{rrf\_k} + r_{\text{dense}}(d)}$$
-*Defaults managed via Flagsmith Remote Config: $\alpha = 0.45, \text{rrf\_k} = 60, \text{code\_boost} = 1.35\times$.*
-
-### D. Conjugate Beta-Binomial Bayesian Model
-Models true conversion rate $\theta_i$ for each variant using a conjugate uniform prior $\text{Beta}(1, 1)$. Upon observing $N_i$ exposures and $k_i$ conversions:
-$$\theta_i \sim \text{Beta}(\alpha_0 + k_i, \, \beta_0 + N_i - k_i)$$
-- **Monte Carlo Win Probability:** Evaluated across 10,000 independent draws from all 3 posterior Beta distributions.
-- **95% Credible Intervals:** Exact $2.5^{\text{th}}$ and $97.5^{\text{th}}$ empirical percentiles.
-
----
-
-## 5. Flagsmith Remote Configuration & Feature Flags
-
-| Flag Key | Type | Description |
+| Dimension | Mode A: Offline Retrieval Benchmark | Mode B: User Experiment (Flagsmith-Assigned) |
 | :--- | :--- | :--- |
-| `retrieval_ranking_engine` | Multivariate (String) | Splits traffic between `lexical_bm25`, `semantic_dense`, and `hybrid_rrf`. |
-| `retrieval_ranking_engine_alpha` | Remote Config (Float) | Weight for lexical vs dense fusion (default: `0.45`). |
-| `retrieval_ranking_engine_rrf_k` | Remote Config (Integer) | RRF rank smoothing constant (default: `60`). |
-| `retrieval_ranking_engine_code_boost` | Remote Config (Float) | Boost multiplier for queries containing code syntax (default: `1.35`). |
-| `retrieval_ranking_engine_latency_sla_ms`| Remote Config (Float) | Maximum allowed latency threshold before circuit breaking (default: `25.0`). |
-| `force_lexical_fallback` | Feature Flag (Boolean) | **Kill-switch**: Instantly degrades traffic to pure BM25 during outages. |
+| **Evidence Type** | Algorithmic Retrieval Accuracy on Curated Queries | Behavioral Interaction on Served Results |
+| **Data Source** | 150 categorized queries against 40 technical chunks | Real user search sessions in the workbench |
+| **Primary Metrics** | **Recall@3**, **Precision@1**, **MRR@3**, Latency (ms) | **Snippet Copy Rate (%)**, Lift vs Control, Win Probability |
+| **Relevance Rule** | Ground-truth binary target document match | Did the session user copy a served snippet? |
+| **Variant Assignment**| All 3 algorithms evaluated against every test query | Flagsmith assigns 1 variant per unique session |
+| **Statistical Model** | Empirical retrieval ratios over fixed test set | Conjugate Beta-Binomial Bayesian Posteriors $\text{Beta}(\alpha, \beta)$ |
 
 ---
 
-## 6. Quickstart & Demo Flow
+## 4. Flagsmith Integration & Auditability
+
+### How Flagsmith is Used
+1. **Multivariate Feature Flag (`retrieval_ranking_engine`):**
+   - Distributes incoming search traffic across three variants:
+     - `lexical_bm25` (Control Baseline - 33.3%)
+     - `semantic_dense` (Variant B - 33.3%)
+     - `hybrid_rrf` (Variant C - 33.4%)
+2. **Remote Configuration Parameters:**
+   - `retrieval_ranking_engine_alpha`: Fusion balance factor (default `0.45`).
+   - `retrieval_ranking_engine_rrf_k`: Rank smoothing constant (default `60`).
+   - `retrieval_ranking_engine_code_boost`: Multiplier when code tokens are detected (default `1.35x`).
+   - `retrieval_ranking_engine_latency_sla_ms`: Circuit breaker threshold (default `25.0ms`).
+3. **Identity Traits & Segment Overrides:**
+   - Evaluates traits via `flagsmith.get_identity_flags(identifier, traits)`:
+     - `tier: "enterprise"` &rarr; Route to **Enterprise VIP Users** segment.
+     - `has_error_code: true` &rarr; Route to **Error Code Diagnosticians** segment.
+4. **Circuit Breaker Kill-Switch (`force_lexical_fallback`):**
+   - Instantly forces sub-millisecond BM25 fallback to protect uptime if semantic models spike past SLA.
+
+### Non-Negotiable Auditability & Non-Silent Fallback
+- For every query, SearchForge exposes whether assignment came from:
+  - **`LIVE FLAGSMITH EDGE`**: Successfully evaluated from active Flagsmith SDK.
+  - **`LOCAL SIMULATION`**: Deterministic Murmur3 hash fallback (used when no key is set, or if `retrieval_ranking_engine` is unconfigured in the user's Flagsmith project).
+- SearchForge **never silently falls back** while claiming Flagsmith assigned the variant.
+- Since this integration evaluates flags via the SDK and logs events in the local analytical engine, it is accurately designated as a **"Flagsmith-assigned local experiment"**, not an internal Flagsmith Experimentation service.
+
+---
+
+## 5. Statistical Rigor & Bayesian Model
+
+### Session Accounting & Attribution Safeguards
+1. **Exposure Accounting:** Recorded **at most once per stable session ID** upon their first search query. Repeated searches or re-renders within the same session do not inflate exposure counts.
+2. **Attribution Integrity:** Conversions are strictly attributed **only to the variant served to that specific session**.
+3. **Deduplication:** A session can convert at most once. If a developer copies multiple snippets within one search session, it is recorded as a single successful session to prevent event inflation.
+4. **Observation Window Rule:** A session without a copy event is counted as a non-conversion.
+
+### Beta-Binomial Formulation
+- **Prior:** Flat, uninformative prior $\text{Beta}(\alpha=1, \beta=1)$.
+- **Posterior:** For each variant with $N$ unique exposed sessions and $k$ converted sessions:
+  $$\alpha_{\text{post}} = 1 + k, \quad \beta_{\text{post}} = 1 + (N - k)$$
+- **95% Credible Intervals:** Exact closed-form percentiles via `scipy.stats.beta.ppf([0.025, 0.975], \alpha, \beta)`.
+- **Win Probability:** 10,000 independent draws from each posterior, calculating the probability that variant $v$ has the highest true conversion rate.
+
+### Honest Status Determination (No Fabricated Winners)
+- **`COLLECTING_EVIDENCE`:** Displayed when $N_{\text{total}} < 15$ or $N_{\text{ctrl}} < 5$. States clearly: *"Not enough evidence: Sample size too small. Credible intervals are wide."*
+- **`INCONCLUSIVE`:** Displayed when sample size is sufficient, but no variant has achieved $\ge 95\%$ win probability or intervals overlap heavily.
+- **`STATISTICAL_WINNER_DETECTED`:** Triggered only when a variant achieves $\ge 95\%$ win probability with positive relative lift over control.
+
+---
+
+## 6. Setup & Local Execution
 
 ### Prerequisites
 - Python 3.11+
 - Node.js 18+
 
-### 1. Launch Backend (Port 8000)
+### 1. Start FastAPI Backend (Port 8000)
 ```bash
 cd backend
 python3 -m venv venv && source venv/bin/activate
 pip install -r requirements.txt
 uvicorn main:app --host 127.0.0.1 --port 8000
 ```
+*Health Check:* `curl http://127.0.0.1:8000/api/health`
 
-### 2. Launch Frontend (Port 3000)
+### 2. Start Next.js Frontend (Port 3000)
 ```bash
 cd frontend
 npm install
@@ -114,18 +129,36 @@ Open **`http://localhost:3000`** in your browser.
 
 ## 7. Recommended 3-Minute Demo Script
 
-1. **Top Bar & Flagsmith Inspector (0:00 - 0:45):**
-   - Point out the active Flagsmith connection status pill and live remote config HUD.
-   - Click **"🔑 Key"** in the top bar to show the Glassmorphic runtime environment key configuration modal.
-2. **Demo Preset Chips & Rank Diff (0:45 - 1:30):**
-   - Click `[Exact SDK]` &rarr; notice BM25 ranks #1 because of exact symbol match.
-   - Click `[Conceptual]` &rarr; notice Dense Vector SVD ranks #1 because of semantic intent.
-   - Click `[Hybrid Code]` &rarr; notice Hybrid RRF balances both with contribution bars.
-   - Click **"Copy Code Snippet (Fire Conversion)"** &rarr; watch the toast flash and live conversion counter tick.
-3. **Stream 150 Benchmark Queries (1:30 - 2:30):**
-   - Click **"▶ Stream 150 Real Queries (Bayesian Benchmark)"**.
-   - Watch the 3-variant comparison matrix populate in real time.
-   - Watch the SVG Beta posterior distribution curves separate cleanly as evidence accumulates.
-   - Show the **Statistical Winner Banner**: `🏆 STATISTICAL WINNER DETECTED: hybrid_rrf (+36.2% Lift, 97.4% Win Prob)`.
-4. **Kill-Switch Circuit Breaker (2:30 - 3:00):**
-   - Click `[⚡ Simulate Latency Spike]` &rarr; watch the header flash `🚨 KILL-SWITCH ACTIVE: FORCED BM25 FALLBACK` demonstrating immediate safe degradation.
+### Setup: Split Screen (65% SearchForge / 35% Flagsmith Dashboard)
+
+#### ⏱️ Part 1: Problem & Product Question (0:00 - 0:45)
+1. Point to the top banner:
+   *"We are solving the core question: Which ranking strategy helps developers find and use the right documentation?"*
+2. Point out the **Flagsmith Assignment Audit Badge**: Shows whether the active session was assigned via **LIVE FLAGSMITH EDGE** or **LOCAL SIMULATION**.
+3. Click **"Key"** in the top bar to show the live runtime environment key modal.
+
+#### ⏱️ Part 2: Tri-Pipeline Nuance & Attribution (0:45 - 1:30)
+1. Click **`[Exact SDK]`** (`get_identity_flags transient`):
+   - Notice **BM25 ranks #1**: *"Exact API function symbols need lexical precision. Dense vector search often fuzzifies exact function names."*
+2. Click **`[Conceptual]`** (`gradually test two ranking algos`):
+   - Notice **Dense SVD ranks #1**: *"Zero exact keyword overlap with docs, but semantic embeddings understand the intent."*
+3. Click **`[Hybrid Code]`** (`override segment config enterprise`):
+   - Notice **Hybrid RRF combines both**: Show the equation `[BM25: #2] + [Dense: #1] → RRF Final: #1` and the lexical/dense contribution bar.
+4. Click **"Copy Code Snippet (Logs Real Conversion)"**:
+   - Point out the toast: *"A real conversion event is logged and strictly attributed to the served variant for this session."*
+
+#### ⏱️ Part 3: Dual-Mode Evidence & Reproducible Scenarios (1:30 - 2:30)
+1. **Show Offline Retrieval Benchmark Tab:**
+   - Click **"Offline Retrieval Benchmark"**.
+   - Show the 150-query dataset metrics: Recall@3, Precision@1, MRR@3. Explain: *"This is offline benchmark evidence on labeled queries—never confused with user A/B traffic."*
+2. **Switch back to "User Experiment (A/B)" Tab:**
+   - Click **"Low Sample"**: Watch the status change to **"NOT ENOUGH EVIDENCE (N=12)"** with wide overlapping credible intervals.
+   - Click **"BM25 Wins"**: Watch **lexical_bm25 Control** win when API reference queries dominate! Explain: *"This proves SearchForge is honest and not rigged to always pick hybrid."*
+   - Click **"Hybrid Wins"**: Watch **hybrid_rrf** win (+81% lift, 98.7% win probability) on mixed developer traffic.
+
+#### ⏱️ Part 4: Operational Safety & Rollout Governance (2:30 - 3:00)
+1. Click **`[Latency Spike]`**:
+   - Show the header flash: **`KILL-SWITCH ACTIVE: FORCED BM25`**.
+   - *"If semantic latency spikes beyond our 25ms SLA, Flagsmith acts as a circuit breaker, instantly falling back to BM25 to protect search uptime."*
+2. Point out the **Rollout Governance Control**:
+   - *"Once statistical certainty is reached, traffic is rolled out by updating multivariate weights in Flagsmith with human approval."*

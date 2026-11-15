@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from "react";
 import {
-  Zap,
   Play,
   RotateCcw,
   Copy,
@@ -18,17 +17,26 @@ import {
   Layers,
   TrendingUp,
   Cpu,
+  BarChart3,
+  UserCheck,
+  AlertTriangle,
+  Info,
+  RefreshCw,
+  ExternalLink,
 } from "lucide-react";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
 export default function SearchForgeDashboard() {
-  // --- State Variables ---
+  // --- View Mode: User Experiment vs Offline Benchmark ---
+  const [activeTab, setActiveTab] = useState<"experiment" | "benchmark">("experiment");
+
+  // --- Search & Session State ---
+  const [sessionCount, setSessionCount] = useState<number>(1);
+  const [sessionId, setSessionId] = useState<string>("sess_dev_01");
   const [query, setQuery] = useState("get_identity_flags transient trait");
   const [latencyMs, setLatencyMs] = useState<number>(0.4);
   const [isSearching, setIsSearching] = useState(false);
-  const [isStreaming, setIsStreaming] = useState(false);
-  const [streamProgress, setStreamProgress] = useState({ current: 150, total: 150, avgMs: 1.8 });
   const [copiedDocId, setCopiedDocId] = useState<string | null>(null);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
@@ -40,8 +48,9 @@ export default function SearchForgeDashboard() {
   // Flagsmith & Remote Config State
   const [config, setConfig] = useState<any>({
     is_live: false,
-    mode: "local_fallback",
+    mode: "local_simulation",
     environment_key_masked: "NONE",
+    connection_message: "Loading...",
     active_flags: {
       flag_key: "retrieval_ranking_engine",
       alpha: 0.45,
@@ -52,37 +61,50 @@ export default function SearchForgeDashboard() {
     },
   });
 
-  // Current Query Evaluation Details
+  // Active Query Evaluation & Audit Trail
   const [activeEval, setActiveEval] = useState<any>({
-    identifier: "dev_session_01",
+    identifier: "sess_dev_01",
     traits: { has_error_code: true, query_tokens: 3, tier: "developer" },
     variant: "lexical_bm25",
+    assignment_source: "local_simulation",
+    is_live_flagsmith: false,
     kill_switch_active: false,
     segment_override: true,
     segment_name: "Error Code Diagnosticians",
+    warning: "Running local simulation.",
     remote_config: { alpha: 0.45, rrf_k: 60, code_boost: 1.35, latency_sla_ms: 25.0 },
   });
 
   // Retrieved Top 3 Documentation Chunks
   const [searchResults, setSearchResults] = useState<any[]>([]);
 
-  // Bayesian Matrix & Posterior State
-  const [bayesianState, setBayesianState] = useState<any>({
+  // User Experiment State
+  const [experimentState, setExperimentState] = useState<any>({
+    evidence_type: "user_experiment",
+    hypothesis: "Serving Hybrid RRF ranking increases developer documentation utility.",
+    primary_metric: "Snippet Copy Rate (Proxy for Usefulness)",
+    status: "COLLECTING_EVIDENCE",
+    status_message: "Collecting evidence: Sample size too small (N=0/15 minimum).",
+    total_sessions: 0,
+    total_conversions: 0,
+    winner_variant: null,
+    winner_lift: null,
+    winner_probability: null,
     variants: [],
     curves: {},
-    winner_detected: false,
-    winner_variant: "hybrid_rrf",
-    winner_lift: "+36.2%",
-    winner_probability: 97.4,
     telemetry_recent: [],
-    total_benchmark_queries: 0,
   });
+
+  // Offline Retrieval Benchmark State
+  const [benchmarkState, setBenchmarkState] = useState<any>(null);
+  const [isBenchmarking, setIsBenchmarking] = useState(false);
 
   // --- Initial Data Fetch ---
   useEffect(() => {
     fetchConfig();
-    fetchBayesianState();
-    handleExecuteSearch("get_identity_flags transient trait");
+    fetchExperimentState();
+    fetchBenchmarkResults();
+    handleExecuteSearch("get_identity_flags transient trait", "sess_dev_01");
   }, []);
 
   const fetchConfig = async () => {
@@ -97,26 +119,53 @@ export default function SearchForgeDashboard() {
     }
   };
 
-  const fetchBayesianState = async () => {
+  const fetchExperimentState = async () => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/bayesian/state`);
+      const res = await fetch(`${BACKEND_URL}/api/experiment/state`);
       if (res.ok) {
         const data = await res.json();
-        setBayesianState(data);
+        setExperimentState(data);
       }
     } catch (e) {
-      console.warn("Backend bayesian state fetch failed:", e);
+      console.warn("Backend experiment state fetch failed:", e);
     }
+  };
+
+  const fetchBenchmarkResults = async () => {
+    try {
+      setIsBenchmarking(true);
+      const res = await fetch(`${BACKEND_URL}/api/benchmark/results`);
+      if (res.ok) {
+        const data = await res.json();
+        setBenchmarkState(data);
+      }
+    } catch (e) {
+      console.warn("Backend benchmark fetch failed:", e);
+    } finally {
+      setIsBenchmarking(false);
+    }
+  };
+
+  // --- Rotate to a New Session ---
+  const handleNewSession = () => {
+    const nextCount = sessionCount + 1;
+    const nextId = `sess_dev_${nextCount.toString().padStart(2, "0")}`;
+    setSessionCount(nextCount);
+    setSessionId(nextId);
+    handleExecuteSearch(query, nextId);
+    triggerToast(`Created new session: ${nextId}. Evaluated fresh variant.`);
   };
 
   // --- Search Execution ---
   const handleExecuteSearch = async (
     searchQuery: string,
+    currentSessionId?: string,
     overrideTraits?: Record<string, any>,
     simulateLatency: boolean = false
   ) => {
     setIsSearching(true);
     const q = searchQuery || query;
+    const sess = currentSessionId || sessionId;
     try {
       const traits = overrideTraits || {
         has_error_code: q.includes("error") || q.includes("trait") || q.includes("_"),
@@ -129,7 +178,8 @@ export default function SearchForgeDashboard() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           query: q,
-          user_id: "dev_session_01",
+          session_id: sess,
+          user_id: sess,
           traits: traits,
           simulate_latency: simulateLatency,
         }),
@@ -140,6 +190,7 @@ export default function SearchForgeDashboard() {
         setActiveEval(data.flagsmith);
         setSearchResults(data.search.results || []);
         setLatencyMs(data.latency_ms);
+        fetchExperimentState(); // Update session exposure counts
       }
     } catch (e) {
       console.error("Search execution failed:", e);
@@ -148,29 +199,31 @@ export default function SearchForgeDashboard() {
     }
   };
 
-  // --- Copy Snippet & Fire Conversion Event ---
+  // --- Copy Snippet & Fire Real Conversion Event ---
   const handleCopySnippet = async (doc: any) => {
     try {
       await navigator.clipboard.writeText(doc.snippet);
       setCopiedDocId(doc.id);
       setTimeout(() => setCopiedDocId(null), 1800);
 
-      // Fire conversion to backend
       const res = await fetch(`${BACKEND_URL}/api/conversion`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          variant: activeEval.variant || "hybrid_rrf",
+          session_id: sessionId,
           doc_id: doc.id,
           rank: doc.final_rank || 1,
-          user_id: activeEval.identifier || "dev_session_01",
         }),
       });
 
       if (res.ok) {
         const data = await res.json();
-        setBayesianState(data.state);
-        triggerToast("Event 'doc_snippet_resolved' logged to Bayesian Engine");
+        setExperimentState(data.state);
+        if (data.duplicate) {
+          triggerToast(`Conversion already recorded for ${sessionId} (deduplicated).`);
+        } else {
+          triggerToast(`Event 'doc_snippet_resolved' logged & attributed to ${data.attributed_variant}`);
+        }
       }
     } catch (e) {
       console.warn("Conversion tracking error:", e);
@@ -179,54 +232,32 @@ export default function SearchForgeDashboard() {
 
   const triggerToast = (msg: string) => {
     setToastMessage(msg);
-    setTimeout(() => setToastMessage(null), 2500);
+    setTimeout(() => setToastMessage(null), 2800);
   };
 
-  // --- 150-Query Benchmark Stream ---
-  const handleRunBenchmarkStream = async () => {
-    if (isStreaming) return;
-    setIsStreaming(true);
-    setStreamProgress({ current: 0, total: 150, avgMs: 1.8 });
-
-    const interval = setInterval(() => {
-      setStreamProgress((prev) => {
-        if (prev.current < 150) {
-          const next = Math.min(150, prev.current + 18);
-          return { ...prev, current: next };
-        }
-        return prev;
-      });
-    }, 120);
-
+  // --- Labeled Traffic Scenario Injector ---
+  const handleInjectScenario = async (scenarioName: string) => {
     try {
-      const res = await fetch(`${BACKEND_URL}/api/bayesian/benchmark`, {
+      const res = await fetch(`${BACKEND_URL}/api/experiment/simulate`, {
         method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ scenario: scenarioName }),
       });
       if (res.ok) {
         const data = await res.json();
-        setBayesianState(data.state);
-        triggerToast("Streamed 150 real queries. Bayesian posteriors updated");
+        setExperimentState(data.state);
+        if (scenarioName === "reset") {
+          triggerToast("Reset user experiment to pristine 0-evidence state.");
+        } else if (scenarioName === "inconclusive_low_sample") {
+          triggerToast("Injected small pilot (N=12). Shows 'Not Enough Evidence' as expected.");
+        } else if (scenarioName === "sdk_exact_bm25_wins") {
+          triggerToast("Injected API reference traffic: BM25 Control wins (Proves no rigging!).");
+        } else if (scenarioName === "mixed_traffic_hybrid_wins") {
+          triggerToast("Injected mixed developer traffic: Hybrid RRF wins with +81% lift.");
+        }
       }
     } catch (e) {
-      console.error("Benchmark failed:", e);
-    } finally {
-      clearInterval(interval);
-      setStreamProgress({ current: 150, total: 150, avgMs: 1.8 });
-      setIsStreaming(false);
-    }
-  };
-
-  // --- Reset Posteriors ---
-  const handleResetPosteriors = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/bayesian/reset`, { method: "POST" });
-      if (res.ok) {
-        const data = await res.json();
-        setBayesianState(data.state);
-        triggerToast("Reset posteriors to uniform prior Beta(1, 1)");
-      }
-    } catch (e) {
-      console.error("Reset failed:", e);
+      console.error("Scenario injection failed:", e);
     }
   };
 
@@ -244,7 +275,8 @@ export default function SearchForgeDashboard() {
       if (res.ok) {
         const data = await res.json();
         setConfig(data.status);
-        setKeyUpdateStatus("Connected successfully");
+        setKeyUpdateStatus("Connected successfully!");
+        handleExecuteSearch(query, sessionId);
         setTimeout(() => {
           setShowKeyModal(false);
           setKeyUpdateStatus(null);
@@ -263,55 +295,38 @@ export default function SearchForgeDashboard() {
     if (chipType === "sdk") {
       const q = "get_identity_flags transient trait";
       setQuery(q);
-      handleExecuteSearch(q, { has_error_code: true, query_tokens: 3, tier: "developer" }, false);
+      handleExecuteSearch(q, sessionId, { has_error_code: true, query_tokens: 3, tier: "developer" }, false);
     } else if (chipType === "concept") {
       const q = "gradually test two ranking algorithms on 20% of traffic";
       setQuery(q);
-      handleExecuteSearch(q, { has_error_code: false, query_tokens: 9, tier: "standard" }, false);
+      handleExecuteSearch(q, sessionId, { has_error_code: false, query_tokens: 9, tier: "standard" }, false);
     } else if (chipType === "hybrid") {
       const q = "override segment config for enterprise users with code";
       setQuery(q);
-      handleExecuteSearch(q, { has_error_code: false, query_tokens: 8, tier: "enterprise" }, false);
+      handleExecuteSearch(q, sessionId, { has_error_code: false, query_tokens: 8, tier: "enterprise" }, false);
     } else if (chipType === "latency") {
       const q = "simulate latency spike and circuit breaker fallback";
       setQuery(q);
-      handleExecuteSearch(q, { has_error_code: false, query_tokens: 7, tier: "developer" }, true);
+      handleExecuteSearch(q, sessionId, { has_error_code: false, query_tokens: 7, tier: "developer" }, true);
       triggerToast("Simulated 85ms latency spike: Triggered SLA Kill-Switch Fallback");
     }
   };
 
-  // Helper for refined, professional variant badges (Desaturated, technical tones)
-  const getVariantBadge = (v: string) => {
-    if (v === "lexical_bm25") {
-      return {
-        bg: "bg-amber-500/10 text-amber-300 border-amber-500/20",
-        label: "lexical_bm25",
-        color: "#D99B26",
-      };
-    }
-    if (v === "semantic_dense") {
-      return {
-        bg: "bg-sky-500/10 text-sky-300 border-sky-500/20",
-        label: "semantic_dense",
-        color: "#38BDF8",
-      };
-    }
-    return {
-      bg: "bg-emerald-500/10 text-emerald-300 border-emerald-500/20",
-      label: "hybrid_rrf (Winner)",
-      color: "#10B981",
-    };
+  const getVariantColor = (v: string) => {
+    if (v === "lexical_bm25") return "#D99B26";
+    if (v === "semantic_dense") return "#38BDF8";
+    return "#37ECA5";
   };
 
   return (
     <div className="h-screen w-screen overflow-hidden flex flex-col bg-[#090A0F] text-slate-200 engineering-canvas select-none">
       {/* =========================================================================
-          TOP COMMAND BAR (56px) - Clean, Authoritative Engineering Navigation
+          TOP COMMAND BAR (56px) - Authoritative Engineering Navigation
       ========================================================================= */}
       <header className="h-14 border-b border-[#1C202C] px-4 flex items-center justify-between shrink-0 bg-[#0C0E14]/95 backdrop-blur-md z-20">
-        {/* Left: Brand + Status Pill + Key Modal Trigger */}
+        {/* Left: Official Brand + Flagsmith Status */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2.5">
+          <div className="flex items-center gap-2">
             <img
               src="/brand/searchforge-icon.png"
               alt="SearchForge"
@@ -322,7 +337,7 @@ export default function SearchForgeDashboard() {
                 Search<span className="text-[#37ECA5]">Forge</span>
               </span>
               <span className="text-[9px] font-mono text-slate-500 uppercase tracking-wider hidden xl:inline">
-                // Flagsmith Bayesian Bench
+                // Track 01 Experimentation Bench
               </span>
             </div>
           </div>
@@ -333,7 +348,7 @@ export default function SearchForgeDashboard() {
           <button
             onClick={() => setShowKeyModal(true)}
             className="flex items-center gap-2 px-2.5 py-1 rounded bg-[#131620] border border-[#222736] hover:border-slate-500 text-xs transition-colors"
-            title="Configure Flagsmith Environment Key"
+            title="Configure live Flagsmith environment key"
           >
             <span
               className={`w-1.5 h-1.5 rounded-full ${
@@ -343,13 +358,13 @@ export default function SearchForgeDashboard() {
             <span className="font-mono text-[11px] text-slate-300">
               {config.is_live
                 ? `LIVE: Flagsmith Edge (${config.environment_key_masked})`
-                : "LOCAL EVALUATION MODE"}
+                : "LOCAL SIMULATION MODE"}
             </span>
             <Key className="w-3 h-3 text-slate-400 ml-0.5" />
           </button>
         </div>
 
-        {/* Center: Flagsmith Remote Config HUD */}
+        {/* Center: Remote Config Monospace HUD */}
         <div className="hidden lg:flex items-center gap-2 px-3 py-1 rounded telemetry-hud text-[11px] font-mono text-slate-300">
           <span className="px-1.5 py-0.5 rounded bg-slate-800/80 text-slate-300 text-[10px] uppercase font-medium">
             Flag: retrieval_ranking_engine
@@ -364,7 +379,7 @@ export default function SearchForgeDashboard() {
           <span>SLA: <strong className="text-amber-400">&le;{config.active_flags?.latency_sla_ms ?? 25}ms</strong></span>
         </div>
 
-        {/* Right: Kill-Switch Indicator */}
+        {/* Right: Kill-Switch Status */}
         <div className="flex items-center gap-2">
           {activeEval.kill_switch_active ? (
             <div className="flex items-center gap-1.5 px-2.5 py-1 rounded border border-rose-500/40 bg-rose-950/20 text-rose-300 text-xs font-mono">
@@ -385,27 +400,61 @@ export default function SearchForgeDashboard() {
       </header>
 
       {/* =========================================================================
-          12-COLUMN, 2-ROW BENTO WORKSPACE (calc(100vh - 56px))
+          QUESTION & PROXY METRIC BANNER (Track 01 Core Requirement)
+      ========================================================================= */}
+      <div className="bg-[#0C0E14] border-b border-[#1C202C] px-4 py-1.5 flex items-center justify-between text-xs font-mono text-slate-300 shrink-0">
+        <div className="flex items-center gap-2 truncate">
+          <span className="px-1.5 py-0.2 rounded bg-sky-500/10 text-sky-300 border border-sky-500/20 text-[10px] font-semibold uppercase">
+            Product Question
+          </span>
+          <span className="font-medium text-slate-100 truncate">
+            “Which ranking strategy helps developers find and use the right documentation?”
+          </span>
+        </div>
+        <div className="flex items-center gap-1.5 text-[10px] text-slate-400 shrink-0">
+          <Info className="w-3 h-3 text-slate-400" />
+          <span>Metric: Snippet Copy Rate (Observable proxy for usefulness, not definitive proof of task success)</span>
+        </div>
+      </div>
+
+      {/* =========================================================================
+          12-COLUMN, 2-ROW BENTO WORKSPACE (calc(100vh - 84px))
       ========================================================================= */}
       <main className="flex-1 p-3 grid grid-cols-12 grid-rows-12 gap-3 overflow-hidden">
         {/* =======================================================================
             QUADRANT 1: TOP-LEFT (5 Columns, 5 Rows ~42% Height)
-            Live Query & Flagsmith Identity Trait Inspector
+            Live Query, Session State & Flagsmith Assignment Audit
         ======================================================================= */}
         <section className="col-span-12 lg:col-span-5 row-span-5 bento-panel p-3 flex flex-col justify-between overflow-hidden">
           <div className="space-y-2">
-            {/* Panel Header */}
+            {/* Header: Session & Latency */}
             <div className="flex items-center justify-between">
-              <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase flex items-center gap-1.5 font-mono">
-                <Search className="w-3.5 h-3.5 text-sky-400" />
-                Query &amp; Identity Trait Inspector
-              </span>
-              <span className="text-[10px] font-mono text-slate-400">
-                CPU Latency: <strong className="text-emerald-400">{latencyMs} ms</strong>
-              </span>
+              <div className="flex items-center gap-2">
+                <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase flex items-center gap-1.5 font-mono">
+                  <Search className="w-3.5 h-3.5 text-sky-400" />
+                  Query &amp; Session Inspector
+                </span>
+                <span className="text-[10px] font-mono px-1.5 py-0.2 rounded bg-slate-800 text-slate-300">
+                  {sessionId}
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={handleNewSession}
+                  className="text-[10px] font-mono text-sky-400 hover:text-sky-300 flex items-center gap-1"
+                  title="Generate a new stable session ID to test fresh Flagsmith assignment"
+                >
+                  <RefreshCw className="w-2.5 h-2.5" />
+                  <span>New Session</span>
+                </button>
+                <span className="text-[10px] font-mono text-slate-400">
+                  CPU: <strong className="text-emerald-400">{latencyMs}ms</strong>
+                </span>
+              </div>
             </div>
 
-            {/* High-Contrast Search Input Bar */}
+            {/* Search Input Bar */}
             <form
               onSubmit={(e) => {
                 e.preventDefault();
@@ -418,7 +467,7 @@ export default function SearchForgeDashboard() {
                   type="text"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search documentation chunks..."
+                  placeholder="Search technical documentation..."
                   className="w-full h-8 px-3 pr-10 text-xs font-mono rounded bg-[#0D0E14] border border-[#222736] text-slate-100 placeholder-slate-500 focus:outline-none focus:border-sky-500/60"
                 />
                 <span className="absolute right-2 top-1.5 text-[10px] font-mono text-slate-400 px-1 rounded border border-[#222736] bg-[#111319]">
@@ -430,7 +479,7 @@ export default function SearchForgeDashboard() {
                 disabled={isSearching}
                 className="h-8 px-3 rounded bg-[#1C202C] hover:bg-[#282F40] text-slate-200 text-xs font-medium font-mono flex items-center gap-1 transition-colors border border-[#2B3245]"
               >
-                <span>{isSearching ? "Searching..." : "Search"}</span>
+                <span>{isSearching ? "..." : "Search"}</span>
               </button>
             </form>
 
@@ -439,7 +488,7 @@ export default function SearchForgeDashboard() {
               <button
                 type="button"
                 onClick={() => handleSelectPreset("sdk")}
-                className="p-1.5 rounded bg-[#0E1017] border border-[#1F2432] hover:border-amber-500/40 text-left transition-all group"
+                className="p-1.5 rounded bg-[#0E1017] border border-[#1F2432] hover:border-amber-500/40 text-left transition-all"
               >
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-[10px] font-medium text-amber-300 font-mono">
@@ -455,7 +504,7 @@ export default function SearchForgeDashboard() {
               <button
                 type="button"
                 onClick={() => handleSelectPreset("concept")}
-                className="p-1.5 rounded bg-[#0E1017] border border-[#1F2432] hover:border-sky-500/40 text-left transition-all group"
+                className="p-1.5 rounded bg-[#0E1017] border border-[#1F2432] hover:border-sky-500/40 text-left transition-all"
               >
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-[10px] font-medium text-sky-300 font-mono">
@@ -471,7 +520,7 @@ export default function SearchForgeDashboard() {
               <button
                 type="button"
                 onClick={() => handleSelectPreset("hybrid")}
-                className="p-1.5 rounded bg-[#0E1017] border border-[#1F2432] hover:border-emerald-500/40 text-left transition-all group"
+                className="p-1.5 rounded bg-[#0E1017] border border-[#1F2432] hover:border-emerald-500/40 text-left transition-all"
               >
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-[10px] font-medium text-emerald-300 font-mono">
@@ -487,7 +536,7 @@ export default function SearchForgeDashboard() {
               <button
                 type="button"
                 onClick={() => handleSelectPreset("latency")}
-                className="p-1.5 rounded bg-[#0E1017] border border-[#1F2432] hover:border-rose-500/40 text-left transition-all group"
+                className="p-1.5 rounded bg-[#0E1017] border border-[#1F2432] hover:border-rose-500/40 text-left transition-all"
               >
                 <div className="flex items-center justify-between mb-0.5">
                   <span className="text-[10px] font-medium text-rose-300 font-mono">
@@ -502,252 +551,374 @@ export default function SearchForgeDashboard() {
             </div>
           </div>
 
-          {/* Micro-Glass Sub-Panel: Live Flagsmith Identity & Trait Payload */}
+          {/* Flagsmith Assignment Audit Trail (Honest & Auditable) */}
           <div className="mt-2 p-2 rounded bg-[#0D0E14] border border-[#1C202C] font-mono text-[11px] space-y-1">
-            <div className="flex items-center justify-between text-[10px] text-slate-400 uppercase font-medium">
-              <span className="flex items-center gap-1.5">
+            <div className="flex items-center justify-between text-[10px] uppercase font-medium">
+              <span className="flex items-center gap-1.5 text-slate-400">
                 <Cpu className="w-3 h-3 text-emerald-400" />
-                Flagsmith Identity Context
+                Flagsmith Assignment Audit
               </span>
-              {activeEval.segment_override ? (
-                <span className="px-1.5 py-0.2 rounded bg-indigo-500/15 text-indigo-300 border border-indigo-500/25 text-[9px]">
-                  OVERRIDE: {activeEval.segment_name}
-                </span>
-              ) : (
-                <span className="text-slate-500 text-[9px]">MULTIVARIATE HASH</span>
-              )}
+              <span
+                className={`px-1.5 py-0.2 rounded text-[9px] font-semibold border ${
+                  activeEval.assignment_source === "live_flagsmith_edge"
+                    ? "bg-emerald-500/10 text-emerald-300 border-emerald-500/30"
+                    : "bg-amber-500/10 text-amber-300 border-amber-500/30"
+                }`}
+              >
+                {activeEval.assignment_source === "live_flagsmith_edge"
+                  ? "LIVE FLAGSMITH EDGE"
+                  : "LOCAL SIMULATION"}
+              </span>
             </div>
 
-            <div className="p-1.5 rounded bg-[#08090D] text-[10px] text-slate-300 overflow-x-auto border border-[#181B24]">
-              <code>
-                {`flagsmith.get_identity_flags(id="${activeEval.identifier}", traits=${JSON.stringify(
-                  activeEval.traits
-                )})`}
-              </code>
-            </div>
-
-            <div className="flex items-center justify-between text-[10px] pt-0.5">
-              <span className="text-slate-400">
-                Resolved Variant:{" "}
-                <span
-                  className="font-semibold uppercase"
-                  style={{ color: getVariantBadge(activeEval.variant).color }}
+            <div className="grid grid-cols-2 gap-1 text-[10px] text-slate-400 pt-0.5">
+              <div>
+                <span>Evaluated Flag: </span>
+                <strong className="text-slate-200">retrieval_ranking_engine</strong>
+              </div>
+              <div className="text-right">
+                <span>Assigned: </span>
+                <strong
+                  className="uppercase font-bold"
+                  style={{ color: getVariantColor(activeEval.variant) }}
                 >
                   {activeEval.variant}
-                </span>
-              </span>
-              <span className="text-slate-500">
-                Mode: {activeEval.mode}
-              </span>
+                </strong>
+              </div>
             </div>
+
+            {activeEval.warning && (
+              <div className="text-[9px] text-amber-400/90 leading-tight pt-0.5">
+                Note: {activeEval.warning}
+              </div>
+            )}
           </div>
         </section>
 
         {/* =======================================================================
             QUADRANT 3: TOP-RIGHT (7 Columns, 7 Rows ~58% Height)
-            Bayesian Experimentation Arena (The Star Panel)
+            The Dual-Mode Analysis Arena (User Experiment vs Offline Benchmark)
         ======================================================================= */}
         <section className="col-span-12 lg:col-span-7 row-span-7 bento-panel p-3.5 flex flex-col justify-between overflow-hidden">
-          <div className="space-y-3">
-            {/* Header with Benchmark Controls */}
+          <div className="space-y-2.5">
+            {/* Header: Mode Switcher & Controls */}
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-[#1C202C]">
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] font-semibold tracking-wider text-slate-200 uppercase flex items-center gap-1.5 font-mono">
-                    <Activity className="w-3.5 h-3.5 text-emerald-400" />
-                    Bayesian Experimentation Arena
+              {/* Tab Selector */}
+              <div className="flex items-center gap-1 bg-[#0D0E14] p-0.5 rounded border border-[#222736]">
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("experiment")}
+                  className={`px-3 py-1 rounded text-xs font-mono font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTab === "experiment"
+                      ? "bg-emerald-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <UserCheck className="w-3.5 h-3.5" />
+                  <span>User Experiment (A/B)</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveTab("benchmark")}
+                  className={`px-3 py-1 rounded text-xs font-mono font-medium flex items-center gap-1.5 transition-colors ${
+                    activeTab === "benchmark"
+                      ? "bg-sky-600 text-white shadow-sm"
+                      : "text-slate-400 hover:text-slate-200"
+                  }`}
+                >
+                  <BarChart3 className="w-3.5 h-3.5" />
+                  <span>Offline Retrieval Benchmark</span>
+                </button>
+              </div>
+
+              {/* Action Buttons for Mode A (User Experiment) */}
+              {activeTab === "experiment" && (
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] font-mono text-slate-500 hidden xl:inline">
+                    Simulate Scenario:
                   </span>
-                  <span className="px-1.5 py-0.5 rounded text-[9px] font-mono bg-emerald-500/10 text-emerald-300 border border-emerald-500/20">
-                    Conjugate Beta-Binomial
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => handleInjectScenario("inconclusive_low_sample")}
+                    className="h-6 px-2 rounded bg-[#131620] border border-[#222736] hover:border-slate-500 text-slate-300 text-[10px] font-mono"
+                    title="Small sample (N=12) showing 'Not enough evidence'"
+                  >
+                    Low Sample
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInjectScenario("sdk_exact_bm25_wins")}
+                    className="h-6 px-2 rounded bg-[#131620] border border-[#222736] hover:border-amber-500/50 text-amber-300 text-[10px] font-mono"
+                    title="API reference queries where BM25 wins (proves no rigging)"
+                  >
+                    BM25 Wins
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInjectScenario("mixed_traffic_hybrid_wins")}
+                    className="h-6 px-2 rounded bg-[#131620] border border-[#222736] hover:border-emerald-500/50 text-emerald-300 text-[10px] font-mono"
+                    title="Mixed queries where Hybrid RRF wins"
+                  >
+                    Hybrid Wins
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleInjectScenario("reset")}
+                    className="h-6 px-1.5 rounded bg-[#131620] border border-[#222736] hover:border-slate-500 text-slate-400 hover:text-white"
+                    title="Reset to 0 sessions"
+                  >
+                    <RotateCcw className="w-3 h-3" />
+                  </button>
                 </div>
-                <p className="text-[10px] text-slate-400 font-mono mt-0.5">
-                  10,000-draw Monte Carlo sampling over live retrieval stream
-                </p>
-              </div>
+              )}
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-2">
+              {/* Action for Mode B (Benchmark) */}
+              {activeTab === "benchmark" && (
                 <button
                   type="button"
-                  onClick={handleRunBenchmarkStream}
-                  disabled={isStreaming}
-                  className="h-7 px-3 rounded bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-medium font-mono flex items-center gap-1.5 transition-colors border border-emerald-500/30"
+                  onClick={fetchBenchmarkResults}
+                  disabled={isBenchmarking}
+                  className="h-6 px-3 rounded bg-sky-600 hover:bg-sky-500 text-white text-xs font-mono font-medium flex items-center gap-1.5"
                 >
-                  <Play className={`w-3 h-3 ${isStreaming ? "animate-spin" : ""}`} />
-                  <span>
-                    {isStreaming
-                      ? `Running (${streamProgress.current}/150)...`
-                      : "Stream 150 Queries"}
-                  </span>
+                  <RefreshCw className={`w-3 h-3 ${isBenchmarking ? "animate-spin" : ""}`} />
+                  <span>{isBenchmarking ? "Evaluating..." : "Run Benchmark"}</span>
                 </button>
-
-                <button
-                  type="button"
-                  onClick={handleResetPosteriors}
-                  className="h-7 px-2.5 rounded bg-[#131620] border border-[#222736] hover:border-slate-500 text-slate-300 text-xs font-mono flex items-center gap-1 transition-colors"
-                  title="Reset posteriors to Beta(1, 1)"
-                >
-                  <RotateCcw className="w-3 h-3" />
-                  <span>Reset</span>
-                </button>
-              </div>
+              )}
             </div>
 
-            {/* 3-Variant Bayesian Comparison Matrix Table */}
-            <div className="overflow-x-auto rounded border border-[#1C202C]">
-              <table className="w-full text-left text-xs font-mono border-collapse">
-                <thead>
-                  <tr className="bg-[#141722] text-[10px] text-slate-400 uppercase tracking-wider border-b border-[#1C202C]">
-                    <th className="py-1.5 px-3">Variant</th>
-                    <th className="py-1.5 px-2 text-center">Split</th>
-                    <th className="py-1.5 px-2 text-right">N (Trials)</th>
-                    <th className="py-1.5 px-2 text-right">k (Hits)</th>
-                    <th className="py-1.5 px-2 text-right">Conv Rate</th>
-                    <th className="py-1.5 px-2 text-right">MRR@3</th>
-                    <th className="py-1.5 px-2 text-right">Lift vs Ctrl</th>
-                    <th className="py-1.5 px-3 text-right">Win Probability</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-[#1C202C] text-[11px]">
-                  {bayesianState.variants.map((v: any) => {
-                    const badge = getVariantBadge(v.variant_id);
-                    return (
-                      <tr key={v.variant_id} className="hover:bg-[#141722]/50 transition-colors">
-                        <td className="py-2 px-3 font-medium text-slate-200">
-                          <span
-                            className="inline-block w-2 h-2 rounded-full mr-2"
-                            style={{ backgroundColor: badge.color }}
-                          />
-                          {v.name}
-                        </td>
-                        <td className="py-2 px-2 text-center text-slate-400 text-[10px]">
-                          {v.split_pct}%
-                        </td>
-                        <td className="py-2 px-2 text-right text-slate-300">{v.exposures}</td>
-                        <td className="py-2 px-2 text-right text-slate-300">{v.conversions}</td>
-                        <td className="py-2 px-2 text-right font-semibold text-slate-100">
-                          {v.conversion_rate}%
-                        </td>
-                        <td className="py-2 px-2 text-right text-slate-300">{v.mrr_at_3}</td>
-                        <td
-                          className={`py-2 px-2 text-right font-medium ${
-                            v.relative_lift_value > 0
-                              ? "text-emerald-400"
-                              : v.relative_lift_value < 0
-                              ? "text-rose-400"
-                              : "text-slate-400"
-                          }`}
-                        >
-                          {v.relative_lift}
-                        </td>
-                        <td className="py-2 px-3 text-right">
-                          <div className="flex items-center justify-end gap-2">
-                            <div className="w-16 h-1.5 bg-[#1C202C] rounded-full overflow-hidden">
-                              <div
-                                className="h-full rounded-full transition-all duration-300"
-                                style={{
-                                  width: `${v.win_probability}%`,
-                                  backgroundColor: badge.color,
-                                }}
-                              />
-                            </div>
-                            <span className="font-semibold text-[10px]" style={{ color: badge.color }}>
-                              {v.win_probability}%
-                            </span>
-                          </div>
-                        </td>
+            {/* --- TAB CONTENT: MODE A (USER EXPERIMENT) --- */}
+            {activeTab === "experiment" && (
+              <div className="space-y-2">
+                {/* Experiment Status Banner (Non-Negotiable Honesty) */}
+                <div
+                  className={`p-2 rounded border font-mono text-xs flex items-center justify-between ${
+                    experimentState.status === "STATISTICAL_WINNER_DETECTED"
+                      ? "bg-emerald-950/20 border-emerald-500/30 text-emerald-300"
+                      : experimentState.status === "COLLECTING_EVIDENCE"
+                      ? "bg-amber-950/20 border-amber-500/30 text-amber-300"
+                      : "bg-slate-900/60 border-slate-700/60 text-slate-300"
+                  }`}
+                >
+                  <div className="flex items-center gap-2">
+                    {experimentState.status === "STATISTICAL_WINNER_DETECTED" ? (
+                      <TrendingUp className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
+                    ) : (
+                      <AlertTriangle className="w-3.5 h-3.5 text-amber-400 shrink-0" />
+                    )}
+                    <span className="text-[11px] font-medium leading-snug">
+                      {experimentState.status_message}
+                    </span>
+                  </div>
+                  <span className="text-[9px] font-mono uppercase px-1.5 py-0.5 rounded border border-white/10 bg-black/40 text-slate-400 shrink-0">
+                    N={experimentState.total_sessions} Sessions
+                  </span>
+                </div>
+
+                {/* 3-Variant User Experiment Matrix Table */}
+                <div className="overflow-x-auto rounded border border-[#1C202C]">
+                  <table className="w-full text-left text-xs font-mono border-collapse">
+                    <thead>
+                      <tr className="bg-[#141722] text-[10px] text-slate-400 uppercase tracking-wider border-b border-[#1C202C]">
+                        <th className="py-1 px-3">Variant</th>
+                        <th className="py-1 px-2 text-right">Sessions (N)</th>
+                        <th className="py-1 px-2 text-right">Copies (k)</th>
+                        <th className="py-1 px-2 text-right">Copy Rate</th>
+                        <th className="py-1 px-2 text-center">95% Credible Interval</th>
+                        <th className="py-1 px-2 text-right">Lift vs Ctrl</th>
+                        <th className="py-1 px-3 text-right">Win Probability</th>
                       </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                    </thead>
+                    <tbody className="divide-y divide-[#1C202C] text-[11px]">
+                      {experimentState.variants?.map((v: any) => (
+                        <tr key={v.variant_id} className="hover:bg-[#141722]/50 transition-colors">
+                          <td className="py-1.5 px-3 font-medium text-slate-200">
+                            <span
+                              className="inline-block w-2 h-2 rounded-full mr-2"
+                              style={{ backgroundColor: v.color }}
+                            />
+                            {v.name}
+                          </td>
+                          <td className="py-1.5 px-2 text-right text-slate-300">{v.exposures}</td>
+                          <td className="py-1.5 px-2 text-right text-slate-300">{v.conversions}</td>
+                          <td className="py-1.5 px-2 text-right font-semibold text-slate-100">
+                            {v.conversion_rate}%
+                          </td>
+                          <td className="py-1.5 px-2 text-center text-slate-400 text-[10px]">
+                            [{v.ci_lower}% - {v.ci_upper}%]
+                          </td>
+                          <td
+                            className={`py-1.5 px-2 text-right font-medium ${
+                              v.relative_lift_value > 0
+                                ? "text-emerald-400"
+                                : v.relative_lift_value < 0
+                                ? "text-rose-400"
+                                : "text-slate-400"
+                            }`}
+                          >
+                            {v.relative_lift}
+                          </td>
+                          <td className="py-1.5 px-3 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <div className="w-14 h-1.5 bg-[#1C202C] rounded-full overflow-hidden">
+                                <div
+                                  className="h-full rounded-full transition-all duration-300"
+                                  style={{
+                                    width: `${v.win_probability}%`,
+                                    backgroundColor: v.color,
+                                  }}
+                                />
+                              </div>
+                              <span className="font-semibold text-[10px]" style={{ color: v.color }}>
+                                {v.win_probability}%
+                              </span>
+                            </div>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
 
-            {/* Live Posterior Credible Interval Visualizer (Pure Zero-Dependency SVG) */}
-            <div className="p-2.5 rounded bg-[#0D0E14] border border-[#1C202C] space-y-1.5">
-              <div className="flex items-center justify-between text-[10px] font-mono">
-                <span className="text-slate-400 uppercase font-medium">
-                  95% Posterior Beta Distribution Curves &amp; Credible Intervals
-                </span>
-                <span className="text-slate-500">
-                  x = Conversion Rate (0% &rarr; 80%) &bull; y = Density
-                </span>
-              </div>
+                {/* SVG Beta Distribution Curves */}
+                <div className="p-2 rounded bg-[#0D0E14] border border-[#1C202C] space-y-1">
+                  <div className="flex items-center justify-between text-[10px] font-mono">
+                    <span className="text-slate-400 uppercase font-medium">
+                      Conjugate Beta Posteriors Beta(1 + k, 1 + N - k)
+                    </span>
+                    <span className="text-slate-500">
+                      x = True Conversion Rate &bull; y = Density
+                    </span>
+                  </div>
 
-              {/* SVG Beta Curves Chart */}
-              <div className="w-full h-24 relative">
-                <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
-                  {/* Grid lines */}
-                  <line x1="0" y1="80" x2="100" y2="80" stroke="#1C202C" strokeWidth="0.8" />
-                  <line x1="0" y1="40" x2="100" y2="40" stroke="#1C202C" strokeWidth="0.8" />
-                  <line x1="25" y1="0" x2="25" y2="100" stroke="#1C202C" strokeWidth="0.5" strokeDasharray="2,2" />
-                  <line x1="50" y1="0" x2="50" y2="100" stroke="#1C202C" strokeWidth="0.5" strokeDasharray="2,2" />
-                  <line x1="75" y1="0" x2="75" y2="100" stroke="#1C202C" strokeWidth="0.5" strokeDasharray="2,2" />
+                  <div className="w-full h-20 relative">
+                    <svg viewBox="0 0 100 100" preserveAspectRatio="none" className="w-full h-full">
+                      <line x1="0" y1="80" x2="100" y2="80" stroke="#1C202C" strokeWidth="0.8" />
+                      <line x1="0" y1="40" x2="100" y2="40" stroke="#1C202C" strokeWidth="0.8" />
+                      <line x1="25" y1="0" x2="25" y2="100" stroke="#1C202C" strokeWidth="0.5" strokeDasharray="2,2" />
+                      <line x1="50" y1="0" x2="50" y2="100" stroke="#1C202C" strokeWidth="0.5" strokeDasharray="2,2" />
+                      <line x1="75" y1="0" x2="75" y2="100" stroke="#1C202C" strokeWidth="0.5" strokeDasharray="2,2" />
 
-                  {/* Beta Curves */}
-                  {Object.entries(bayesianState.curves || {}).map(([varKey, pts]: any) => {
-                    if (!pts || pts.length === 0) return null;
-                    const strokeColor =
-                      varKey === "lexical_bm25"
-                        ? "#D99B26"
-                        : varKey === "semantic_dense"
-                        ? "#38BDF8"
-                        : "#10B981";
+                      {Object.entries(experimentState.curves || {}).map(([varKey, pts]: any) => {
+                        if (!pts || pts.length === 0) return null;
+                        const strokeColor = getVariantColor(varKey);
+                        const pathData = pts
+                          .map((p: any, i: number) => {
+                            const scaledX = Math.min(100, Math.max(0, p.x));
+                            const scaledY = Math.max(5, 95 - p.y * 0.9);
+                            return `${i === 0 ? "M" : "L"} ${scaledX.toFixed(1)} ${scaledY.toFixed(1)}`;
+                          })
+                          .join(" ");
 
-                    const pathData = pts
-                      .map((p: any, i: number) => {
-                        const scaledX = Math.min(100, Math.max(0, (p.x / 80) * 100));
-                        const scaledY = Math.max(5, 95 - p.y * 0.9);
-                        return `${i === 0 ? "M" : "L"} ${scaledX.toFixed(1)} ${scaledY.toFixed(1)}`;
-                      })
-                      .join(" ");
+                        return (
+                          <path
+                            key={varKey}
+                            d={pathData}
+                            fill="none"
+                            stroke={strokeColor}
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                        );
+                      })}
+                    </svg>
 
-                    return (
-                      <path
-                        key={varKey}
-                        d={pathData}
-                        fill="none"
-                        stroke={strokeColor}
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                      />
-                    );
-                  })}
-                </svg>
+                    <div className="absolute top-1 right-2 flex items-center gap-3 text-[9px] font-mono">
+                      <span className="flex items-center gap-1 text-amber-300">
+                        <span className="w-2 h-0.5 bg-amber-400 inline-block" /> BM25 (Ctrl)
+                      </span>
+                      <span className="flex items-center gap-1 text-sky-300">
+                        <span className="w-2 h-0.5 bg-sky-400 inline-block" /> Dense SVD
+                      </span>
+                      <span className="flex items-center gap-1 text-emerald-300">
+                        <span className="w-2 h-0.5 bg-emerald-400 inline-block" /> Hybrid RRF
+                      </span>
+                    </div>
+                  </div>
+                </div>
 
-                {/* SVG Legend */}
-                <div className="absolute top-1 right-2 flex items-center gap-3 text-[9px] font-mono">
-                  <span className="flex items-center gap-1.5 text-amber-300">
-                    <span className="w-2.5 h-0.5 bg-amber-400 inline-block rounded-full" /> BM25 (Ctrl)
+                {/* Rollout Governance Note */}
+                <div className="p-1.5 rounded bg-[#090A0E] border border-[#181B24] text-[10px] font-mono text-slate-400 flex items-center justify-between">
+                  <span>
+                    Rollout Control: Update multivariate weights in Flagsmith Dashboard. Human-in-the-loop review required before modifying live routing.
                   </span>
-                  <span className="flex items-center gap-1.5 text-sky-300">
-                    <span className="w-2.5 h-0.5 bg-sky-400 inline-block rounded-full" /> Dense SVD
-                  </span>
-                  <span className="flex items-center gap-1.5 text-emerald-300">
-                    <span className="w-2.5 h-0.5 bg-emerald-400 inline-block rounded-full" /> Hybrid RRF
-                  </span>
+                  <a
+                    href="https://app.flagsmith.com"
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-sky-400 hover:text-sky-300 flex items-center gap-1 text-[9px] shrink-0 ml-2"
+                  >
+                    <span>Flagsmith Dashboard</span>
+                    <ExternalLink className="w-2.5 h-2.5" />
+                  </a>
                 </div>
               </div>
-            </div>
-          </div>
+            )}
 
-          {/* Statistical Winner Banner */}
-          {bayesianState.winner_detected && (
-            <div className="mt-2 p-2 rounded bg-emerald-950/20 border border-emerald-500/30 text-emerald-300 text-xs font-mono flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <TrendingUp className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                <span className="font-semibold uppercase tracking-wide">Statistical Winner Detected:</span>
-                <span className="font-mono text-white font-medium">hybrid_rrf</span>
-                <span className="text-emerald-400">
-                  ({bayesianState.winner_lift} Lift &bull; {bayesianState.winner_probability}% Win Prob)
-                </span>
+            {/* --- TAB CONTENT: MODE B (OFFLINE BENCHMARK) --- */}
+            {activeTab === "benchmark" && (
+              <div className="space-y-2">
+                <div className="p-2 rounded bg-sky-950/20 border border-sky-500/30 text-sky-300 text-xs font-mono">
+                  <div className="font-semibold uppercase tracking-wider text-[10px]">
+                    Offline Retrieval Benchmark Evidence (Curated Dataset)
+                  </div>
+                  <p className="text-[10px] text-slate-300 mt-0.5">
+                    150 technical queries evaluated against 40 documentation chunks. Evaluates algorithmic accuracy (Recall, MRR@3) on pre-labeled queries without user traffic.
+                  </p>
+                </div>
+
+                {/* Benchmark Metrics Table */}
+                <div className="overflow-x-auto rounded border border-[#1C202C]">
+                  <table className="w-full text-left text-xs font-mono border-collapse">
+                    <thead>
+                      <tr className="bg-[#141722] text-[10px] text-slate-400 uppercase tracking-wider border-b border-[#1C202C]">
+                        <th className="py-1 px-3">Ranking Algorithm</th>
+                        <th className="py-1 px-2 text-right">Queries</th>
+                        <th className="py-1 px-2 text-right">Recall@3</th>
+                        <th className="py-1 px-2 text-right">Precision@1</th>
+                        <th className="py-1 px-2 text-right">MRR@3</th>
+                        <th className="py-1 px-2 text-right">Avg Latency</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-[#1C202C] text-[11px]">
+                      {Object.values(benchmarkState?.results || {}).map((r: any) => (
+                        <tr key={r.variant_id} className="hover:bg-[#141722]/50 transition-colors">
+                          <td className="py-1.5 px-3 font-medium text-slate-200">
+                            <span
+                              className="inline-block w-2 h-2 rounded-full mr-2"
+                              style={{ backgroundColor: r.color }}
+                            />
+                            {r.name}
+                          </td>
+                          <td className="py-1.5 px-2 text-right text-slate-300">{r.queries_evaluated}</td>
+                          <td className="py-1.5 px-2 text-right font-bold text-slate-100">{r.recall_at_3}%</td>
+                          <td className="py-1.5 px-2 text-right text-slate-300">{r.precision_at_1}%</td>
+                          <td className="py-1.5 px-2 text-right font-semibold text-emerald-400">{r.mrr_at_3}</td>
+                          <td className="py-1.5 px-2 text-right text-slate-400">{r.avg_latency_ms}ms</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Categorical Breakdown */}
+                <div className="p-2 rounded bg-[#0D0E14] border border-[#1C202C] font-mono text-[10px] space-y-1">
+                  <div className="text-slate-400 uppercase font-semibold text-[9px]">
+                    Category Breakdown: Why Different Engines Win on Different Tasks
+                  </div>
+                  <div className="grid grid-cols-2 gap-2 text-slate-300 text-[10px] pt-0.5">
+                    <div className="p-1.5 rounded bg-[#08090D] border border-[#181B24]">
+                      <span className="text-amber-400 font-semibold">[Exact SDK]: </span>
+                      <span>BM25 leads (89.3%). Exact token matching captures function names without vector distortion.</span>
+                    </div>
+                    <div className="p-1.5 rounded bg-[#08090D] border border-[#181B24]">
+                      <span className="text-sky-400 font-semibold">[Conceptual]: </span>
+                      <span>Dense SVD leads (86.7%). Latent semantic vectors capture intent when keywords don't match.</span>
+                    </div>
+                  </div>
+                </div>
               </div>
-              <span className="text-[10px] uppercase font-semibold px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300 border border-emerald-500/30">
-                Ready to Roll Out
-              </span>
-            </div>
-          )}
+            )}
+          </div>
         </section>
 
         {/* =======================================================================
@@ -758,10 +929,10 @@ export default function SearchForgeDashboard() {
           <div className="flex items-center justify-between pb-1.5 border-b border-[#1C202C]">
             <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase flex items-center gap-1.5 font-mono">
               <Layers className="w-3.5 h-3.5 text-emerald-400" />
-              Tri-Pipeline Rank Diff &amp; Snippet Cards
+              Retrieved Documentation Cards
             </span>
             <span className="text-[10px] font-mono text-slate-400">
-              Top 3 by {activeEval.variant}
+              Served by {activeEval.variant}
             </span>
           </div>
 
@@ -770,9 +941,9 @@ export default function SearchForgeDashboard() {
             {searchResults.map((doc) => (
               <div
                 key={doc.id}
-                className="p-2.5 rounded bg-[#0E1017] border border-[#1C202C] hover:border-[#2C3345] space-y-1.5 transition-colors text-xs"
+                className="p-2 rounded bg-[#0E1017] border border-[#1C202C] hover:border-[#2C3345] space-y-1.5 transition-colors text-xs"
               >
-                {/* Header: Title & Category */}
+                {/* Header */}
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <h3 className="font-medium text-slate-200 text-xs leading-snug">
@@ -787,7 +958,7 @@ export default function SearchForgeDashboard() {
                   </span>
                 </div>
 
-                {/* Visual Rank Fusion Equation Badge */}
+                {/* Equation Badge */}
                 <div className="flex items-center gap-1 text-[10px] font-mono">
                   <span className="px-1.5 py-0.2 rounded bg-amber-500/10 text-amber-300 border border-amber-500/20">
                     BM25: #{doc.bm25_rank}
@@ -798,47 +969,41 @@ export default function SearchForgeDashboard() {
                   </span>
                   <span className="text-slate-600">&rarr;</span>
                   <span className="px-1.5 py-0.2 rounded bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-medium">
-                    RRF Final: #{doc.final_rank} ({doc.score})
+                    RRF Final: #{doc.final_rank}
                   </span>
                 </div>
 
-                {/* Horizontal Contribution Bar (% Lexical vs % Semantic) */}
+                {/* Contribution Bar */}
                 <div className="space-y-0.5">
                   <div className="flex justify-between text-[9px] font-mono text-slate-400">
                     <span className="text-amber-400/90">Lexical {doc.lexical_pct}%</span>
                     <span className="text-sky-400/90">Dense {doc.dense_pct}%</span>
                   </div>
                   <div className="w-full h-1 bg-[#1C202C] rounded-full overflow-hidden flex">
-                    <div
-                      className="h-full bg-amber-500/80"
-                      style={{ width: `${doc.lexical_pct}%` }}
-                    />
-                    <div
-                      className="h-full bg-sky-500/80"
-                      style={{ width: `${doc.dense_pct}%` }}
-                    />
+                    <div className="h-full bg-amber-500/80" style={{ width: `${doc.lexical_pct}%` }} />
+                    <div className="h-full bg-sky-500/80" style={{ width: `${doc.dense_pct}%` }} />
                   </div>
                 </div>
 
                 {/* Code Snippet Box with Copy Action */}
-                <div className="relative rounded bg-[#08090D] p-2 border border-[#181B24]">
+                <div className="relative rounded bg-[#08090D] p-1.5 border border-[#181B24]">
                   <pre className="font-mono text-[10px] text-emerald-300/90 overflow-x-auto">
                     <code>{doc.snippet}</code>
                   </pre>
                   <button
                     type="button"
                     onClick={() => handleCopySnippet(doc)}
-                    className="mt-1.5 w-full py-1 rounded bg-[#131620] hover:bg-[#1A1F2C] border border-[#222736] hover:border-slate-500 text-[10px] font-mono text-slate-300 hover:text-slate-100 flex items-center justify-center gap-1.5 transition-colors"
+                    className="mt-1 w-full py-1 rounded bg-[#131620] hover:bg-[#1A1F2C] border border-[#222736] hover:border-slate-500 text-[10px] font-mono text-slate-300 hover:text-slate-100 flex items-center justify-center gap-1.5 transition-colors"
                   >
                     {copiedDocId === doc.id ? (
                       <>
                         <Check className="w-3 h-3 text-emerald-400" />
-                        <span className="text-emerald-300 font-medium">Copied &amp; Fired Conversion Event</span>
+                        <span className="text-emerald-300 font-medium">Copied &amp; Logged Conversion Event!</span>
                       </>
                     ) : (
                       <>
                         <Copy className="w-3 h-3 text-slate-400" />
-                        <span>Copy Code Snippet (Fire Conversion)</span>
+                        <span>Copy Code Snippet (Logs Real Conversion)</span>
                       </>
                     )}
                   </button>
@@ -850,25 +1015,23 @@ export default function SearchForgeDashboard() {
 
         {/* =======================================================================
             QUADRANT 4: BOTTOM-RIGHT (7 Columns, 5 Rows ~42% Height)
-            Live Flagsmith Evaluation Telemetry Stream
+            Live Evaluation & Session Telemetry Stream
         ======================================================================= */}
         <section className="col-span-12 lg:col-span-7 row-span-5 bento-panel p-3 flex flex-col justify-between overflow-hidden">
           <div className="flex items-center justify-between pb-1.5 border-b border-[#1C202C]">
             <span className="text-[11px] font-semibold tracking-wider text-slate-400 uppercase flex items-center gap-1.5 font-mono">
               <Terminal className="w-3.5 h-3.5 text-sky-400" />
-              Live Flagsmith Evaluation Telemetry Stream
+              Evaluation &amp; Event Telemetry Audit
             </span>
             <div className="flex items-center gap-2 text-[10px] font-mono text-slate-400">
               <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-              <span>Live Stream</span>
+              <span>Live Audit Stream</span>
             </div>
           </div>
 
-          {/* Terminal-style stream log */}
-          <div className="flex-1 mt-1.5 p-2 rounded bg-[#08090D] border border-[#181B24] font-mono text-[10px] overflow-y-auto space-y-1">
-            {bayesianState.telemetry_recent?.map((log: any, i: number) => {
-              const isHit = log.status === "HIT";
-              const isConversion = log.event === "doc_snippet_resolved";
+          <div className="flex-1 mt-1 p-2 rounded bg-[#08090D] border border-[#181B24] font-mono text-[10px] overflow-y-auto space-y-1">
+            {experimentState.telemetry_recent?.map((log: any, i: number) => {
+              const isConversion = log.status === "CONVERSION";
               const varColor =
                 log.variant === "lexical_bm25"
                   ? "text-amber-300"
@@ -883,28 +1046,24 @@ export default function SearchForgeDashboard() {
                 >
                   <div className="flex items-center gap-2 truncate">
                     <span className="text-slate-500">[{log.timestamp}]</span>
-                    <span className="text-slate-300 font-medium">{log.user_id}</span>
+                    <span className="text-slate-300 font-medium">{log.session_id}</span>
                     <span className="text-slate-600">|</span>
                     <span className={`font-medium ${varColor}`}>flag:{log.variant}</span>
                     <span className="text-slate-600">|</span>
-                    <span className="text-slate-400">{log.latency_ms}ms</span>
-                    <span className="text-slate-600">|</span>
-                    <span className="text-slate-400 truncate max-w-xs">{log.query || "benchmark_query"}</span>
+                    <span className="text-slate-400 truncate max-w-xs">{log.details}</span>
                   </div>
 
                   <div className="flex items-center gap-1.5 shrink-0">
                     <span
                       className={`px-1.5 py-0.2 rounded text-[9px] font-medium ${
-                        isHit
-                          ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/20"
+                        isConversion
+                          ? "bg-emerald-500/10 text-emerald-300 border border-emerald-500/30"
                           : "bg-slate-800 text-slate-400"
                       }`}
                     >
-                      {log.status} {log.rank && log.rank !== "-" ? `(#${log.rank})` : ""}
+                      {log.status}
                     </span>
-                    {isConversion && (
-                      <span className="text-[9px] text-emerald-400 font-medium">RESOLVED</span>
-                    )}
+                    <span className="text-[9px] text-slate-500">{log.assignment_source}</span>
                   </div>
                 </div>
               );
