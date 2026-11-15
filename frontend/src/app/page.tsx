@@ -25,7 +25,24 @@ import {
   ExternalLink,
 } from "lucide-react";
 
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
+import {
+  FlagsmithConfig,
+  UserExperimentState,
+  OfflineBenchmarkState,
+  FlagsmithEvaluation,
+  SearchDocument,
+} from "@/types";
+import {
+  fetchFlagsmithConfig,
+  fetchUserExperimentState,
+  fetchOfflineBenchmark,
+  executeSearch,
+  recordSnippetConversion,
+  injectLabeledScenario,
+  updateFlagsmithKey,
+  EMPTY_FLAGSMITH_CONFIG,
+  EMPTY_EXPERIMENT_STATE,
+} from "@/lib/api";
 
 export default function SearchForgeDashboard() {
   // --- View Mode: User Experiment vs Offline Benchmark ---
@@ -46,20 +63,7 @@ export default function SearchForgeDashboard() {
   const [keyUpdateStatus, setKeyUpdateStatus] = useState<string | null>(null);
 
   // Flagsmith & Remote Config State
-  const [config, setConfig] = useState<any>({
-    is_live: false,
-    mode: "local_simulation",
-    environment_key_masked: "NONE",
-    connection_message: "Loading...",
-    active_flags: {
-      flag_key: "retrieval_ranking_engine",
-      alpha: 0.45,
-      rrf_k: 60,
-      code_boost: 1.35,
-      latency_sla_ms: 25.0,
-      kill_switch_active: false,
-    },
-  });
+  const [config, setConfig] = useState<FlagsmithConfig>(EMPTY_FLAGSMITH_CONFIG);
 
   // Active Query Evaluation & Audit Trail
   const [activeEval, setActiveEval] = useState<any>({
@@ -76,27 +80,13 @@ export default function SearchForgeDashboard() {
   });
 
   // Retrieved Top 3 Documentation Chunks
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<SearchDocument[]>([]);
 
   // User Experiment State
-  const [experimentState, setExperimentState] = useState<any>({
-    evidence_type: "user_experiment",
-    hypothesis: "Serving Hybrid RRF ranking increases developer documentation utility.",
-    primary_metric: "Snippet Copy Rate (Proxy for Usefulness)",
-    status: "COLLECTING_EVIDENCE",
-    status_message: "Collecting evidence: Sample size too small (N=0/15 minimum).",
-    total_sessions: 0,
-    total_conversions: 0,
-    winner_variant: null,
-    winner_lift: null,
-    winner_probability: null,
-    variants: [],
-    curves: {},
-    telemetry_recent: [],
-  });
+  const [experimentState, setExperimentState] = useState<UserExperimentState>(EMPTY_EXPERIMENT_STATE);
 
   // Offline Retrieval Benchmark State
-  const [benchmarkState, setBenchmarkState] = useState<any>(null);
+  const [benchmarkState, setBenchmarkState] = useState<OfflineBenchmarkState | null>(null);
   const [isBenchmarking, setIsBenchmarking] = useState(false);
 
   // --- Initial Data Fetch ---
@@ -108,42 +98,20 @@ export default function SearchForgeDashboard() {
   }, []);
 
   const fetchConfig = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/config`);
-      if (res.ok) {
-        const data = await res.json();
-        setConfig(data);
-      }
-    } catch (e) {
-      console.warn("Backend config fetch failed:", e);
-    }
+    const data = await fetchFlagsmithConfig();
+    setConfig(data);
   };
 
   const fetchExperimentState = async () => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/experiment/state`);
-      if (res.ok) {
-        const data = await res.json();
-        setExperimentState(data);
-      }
-    } catch (e) {
-      console.warn("Backend experiment state fetch failed:", e);
-    }
+    const data = await fetchUserExperimentState();
+    setExperimentState(data);
   };
 
   const fetchBenchmarkResults = async () => {
-    try {
-      setIsBenchmarking(true);
-      const res = await fetch(`${BACKEND_URL}/api/benchmark/results`);
-      if (res.ok) {
-        const data = await res.json();
-        setBenchmarkState(data);
-      }
-    } catch (e) {
-      console.warn("Backend benchmark fetch failed:", e);
-    } finally {
-      setIsBenchmarking(false);
-    }
+    setIsBenchmarking(true);
+    const data = await fetchOfflineBenchmark();
+    if (data) setBenchmarkState(data);
+    setIsBenchmarking(false);
   };
 
   // --- Rotate to a New Session ---
@@ -173,27 +141,19 @@ export default function SearchForgeDashboard() {
         tier: q.includes("enterprise") ? "enterprise" : "developer",
       };
 
-      const res = await fetch(`${BACKEND_URL}/api/search`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          query: q,
-          session_id: sess,
-          user_id: sess,
-          traits: traits,
-          simulate_latency: simulateLatency,
-        }),
+      const data = await executeSearch({
+        query: q,
+        sessionId: sess,
+        traits,
+        simulateLatency,
       });
 
-      if (res.ok) {
-        const data = await res.json();
+      if (data) {
         setActiveEval(data.flagsmith);
         setSearchResults(data.search.results || []);
         setLatencyMs(data.latency_ms);
         fetchExperimentState(); // Update session exposure counts
       }
-    } catch (e) {
-      console.error("Search execution failed:", e);
     } finally {
       setIsSearching(false);
     }
@@ -206,23 +166,18 @@ export default function SearchForgeDashboard() {
       setCopiedDocId(doc.id);
       setTimeout(() => setCopiedDocId(null), 1800);
 
-      const res = await fetch(`${BACKEND_URL}/api/conversion`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          session_id: sessionId,
-          doc_id: doc.id,
-          rank: doc.final_rank || 1,
-        }),
+      const res = await recordSnippetConversion({
+        sessionId,
+        docId: doc.id,
+        rank: doc.final_rank || 1,
       });
 
-      if (res.ok) {
-        const data = await res.json();
-        setExperimentState(data.state);
-        if (data.duplicate) {
+      if (res) {
+        setExperimentState(res.state);
+        if (res.duplicate) {
           triggerToast(`Conversion already recorded for ${sessionId} (deduplicated).`);
         } else {
-          triggerToast(`Event 'doc_snippet_resolved' logged & attributed to ${data.attributed_variant}`);
+          triggerToast(`Event 'doc_snippet_resolved' logged & attributed to ${res.attributed_variant}`);
         }
       }
     } catch (e) {
@@ -236,28 +191,19 @@ export default function SearchForgeDashboard() {
   };
 
   // --- Labeled Traffic Scenario Injector ---
-  const handleInjectScenario = async (scenarioName: string) => {
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/experiment/simulate`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ scenario: scenarioName }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setExperimentState(data.state);
-        if (scenarioName === "reset") {
-          triggerToast("Reset user experiment to pristine 0-evidence state.");
-        } else if (scenarioName === "inconclusive_low_sample") {
-          triggerToast("Injected small pilot (N=12). Shows 'Not Enough Evidence' as expected.");
-        } else if (scenarioName === "sdk_exact_bm25_wins") {
-          triggerToast("Injected API reference traffic: BM25 Control wins (Proves no rigging!).");
-        } else if (scenarioName === "mixed_traffic_hybrid_wins") {
-          triggerToast("Injected mixed developer traffic: Hybrid RRF wins with +81% lift.");
-        }
+  const handleInjectScenario = async (scenarioName: "inconclusive_low_sample" | "sdk_exact_bm25_wins" | "mixed_traffic_hybrid_wins" | "reset") => {
+    const newState = await injectLabeledScenario(scenarioName);
+    if (newState) {
+      setExperimentState(newState);
+      if (scenarioName === "reset") {
+        triggerToast("Reset user experiment to pristine 0-evidence state.");
+      } else if (scenarioName === "inconclusive_low_sample") {
+        triggerToast("Injected small pilot (N=12). Shows 'Not Enough Evidence' as expected.");
+      } else if (scenarioName === "sdk_exact_bm25_wins") {
+        triggerToast("Injected API reference traffic: BM25 Control wins (Proves no rigging!).");
+      } else if (scenarioName === "mixed_traffic_hybrid_wins") {
+        triggerToast("Injected mixed developer traffic: Hybrid RRF wins with +81% lift.");
       }
-    } catch (e) {
-      console.error("Scenario injection failed:", e);
     }
   };
 
@@ -266,27 +212,18 @@ export default function SearchForgeDashboard() {
     e.preventDefault();
     if (!inputKey.trim()) return;
     setKeyUpdateStatus("Connecting to Flagsmith...");
-    try {
-      const res = await fetch(`${BACKEND_URL}/api/config/key`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ environment_key: inputKey.trim() }),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        setConfig(data.status);
-        setKeyUpdateStatus("Connected successfully!");
-        handleExecuteSearch(query, sessionId);
-        setTimeout(() => {
-          setShowKeyModal(false);
-          setKeyUpdateStatus(null);
-          setInputKey("");
-        }, 800);
-      } else {
-        setKeyUpdateStatus("Connection failed. Check key format.");
-      }
-    } catch (err) {
-      setKeyUpdateStatus("Network error connecting to backend.");
+    const status = await updateFlagsmithKey(inputKey);
+    if (status) {
+      setConfig(status);
+      setKeyUpdateStatus("Connected successfully!");
+      handleExecuteSearch(query, sessionId);
+      setTimeout(() => {
+        setShowKeyModal(false);
+        setKeyUpdateStatus(null);
+        setInputKey("");
+      }, 800);
+    } else {
+      setKeyUpdateStatus("Connection failed. Check key format.");
     }
   };
 

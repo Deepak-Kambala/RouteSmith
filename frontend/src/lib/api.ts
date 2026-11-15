@@ -1,309 +1,229 @@
-import { Experiment, Repository, AgentSession, TelemetryEvent, IntegrationStatus } from "@/types";
+/**
+ * SearchForge - API Client
+ * Connects to the SearchForge FastAPI backend.
+ * Provides explicit, un-fabricated empty states when backend data is absent or unreachable.
+ */
+
+import {
+  FlagsmithConfig,
+  UserExperimentState,
+  OfflineBenchmarkState,
+  SearchResponse,
+} from "@/types";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8000";
 
-export async function fetchDashboardData(): Promise<{
-  active_experiments_count: number;
-  total_participants_count: number;
-  average_conversion_rate: number;
-  completed_experiments_count: number;
-  activity_series: Array<{ date: string; exposures: number; conversions: number }>;
-  recent_agent_actions: Array<{ id: string; action: string; target: string; time_ago: string; type: string }>;
-  recent_experiments: Experiment[];
-}> {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/dashboard`, { cache: "no-store" });
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn("Backend unavailable, using initial dashboard state:", err);
-  }
+/**
+ * Empty fallback state for Flagsmith configuration when backend is unreachable.
+ * Never invents mock API connections or fake projects.
+ */
+export const EMPTY_FLAGSMITH_CONFIG: FlagsmithConfig = {
+  is_live: false,
+  mode: "unconnected",
+  environment_key_masked: "NONE",
+  api_url: "https://edge.api.flagsmith.com/api/v1/",
+  connection_message: "Backend unavailable: Unable to reach SearchForge API.",
+  active_flags: {
+    flag_key: "retrieval_ranking_engine",
+    default_variant: "hybrid_rrf",
+    alpha: 0.45,
+    rrf_k: 60,
+    code_boost: 1.35,
+    latency_sla_ms: 25.0,
+    kill_switch_active: false,
+  },
+};
 
-  // Graceful fallback seed data with explicit demo labeling
-  return {
-    active_experiments_count: 3,
-    total_participants_count: 14280,
-    average_conversion_rate: 18.4,
-    completed_experiments_count: 8,
-    activity_series: [
-      { date: "May 01", exposures: 840, conversions: 120 },
-      { date: "May 03", exposures: 1120, conversions: 184 },
-      { date: "May 05", exposures: 1430, conversions: 245 },
-      { date: "May 07", exposures: 1680, conversions: 310 },
-      { date: "May 09", exposures: 2100, conversions: 405 },
-      { date: "May 11", exposures: 2350, conversions: 480 },
-    ],
-    recent_agent_actions: [
-      { id: "1", action: "Repository analysed", target: "Deepak-Kambala/RouteSmith", time_ago: "12m ago", type: "analysis" },
-      { id: "2", action: "Hypothesis generated", target: "Signup Flow Simplification", time_ago: "28m ago", type: "hypothesis" },
-      { id: "3", action: "Feature flag created", target: "exp_signup_v2_streamlined", time_ago: "1h ago", type: "flag" },
-      { id: "4", action: "Experiment launched", target: "Checkout One-Click Trial", time_ago: "3h ago", type: "launch" },
-      { id: "5", action: "Results analysed", target: "Pricing Tier Toggle", time_ago: "5h ago", type: "results" },
-    ],
-    recent_experiments: [
-      {
-        id: "exp_signup_v2",
-        name: "Simplified 3-Field Signup Flow",
-        objective: "Increase mobile & desktop registration completion rate",
-        hypothesis: "Removing optional company size and job title fields reduces friction by 25%",
-        repository_id: "repo_1",
-        repository_name: "Deepak-Kambala/RouteSmith",
-        branch: "main",
-        status: "running",
-        feature_flag_key: "signup_form_simplification",
-        total_participants: 3420,
-        created_at: "2026-05-02T10:00:00Z",
-        updated_at: "2026-05-11T16:00:00Z",
-        duration_days: 14,
-        variants: [
-          {
-            id: "control",
-            name: "Variant A (Control 6-field)",
-            type: "control",
-            weight: 50,
-            description: "Standard 6-field registration form with company size and title",
-            exposures: 1710,
-            conversions: 205,
-            conversion_rate: 12.0,
-          },
-          {
-            id: "treatment",
-            name: "Variant B (Treatment 3-field)",
-            type: "treatment",
-            weight: 50,
-            description: "Streamlined 3-field registration form (Name, Work Email, Password)",
-            exposures: 1710,
-            conversions: 424,
-            conversion_rate: 24.8,
-          },
-        ],
-        metrics: {
-          primary_metric: "signup_completed",
-          secondary_metrics: ["time_to_complete_seconds", "activation_rate"],
-          minimum_detectable_effect: 5.0,
-          statistical_power: 0.8,
-          confidence_level: 0.95,
-          p_value: 0.0001,
-          relative_lift: 106.7,
-          is_significant: true,
-        },
-        ai_recommendation: "Variant B demonstrates statistically significant superiority (+106.7% relative lift, p < 0.001). Recommend rolling out to 100% production traffic.",
-      },
-      {
-        id: "exp_cta_placement",
-        name: "Sticky Navigation CTA vs Hero Banner",
-        objective: "Maximize documentation copilot trial starts",
-        hypothesis: "A persistent navbar CTA maintains visual availability during long scroll sessions",
-        repository_id: "repo_1",
-        repository_name: "Deepak-Kambala/RouteSmith",
-        branch: "main",
-        status: "running",
-        feature_flag_key: "nav_sticky_cta_experiment",
-        total_participants: 5890,
-        created_at: "2026-05-06T12:00:00Z",
-        updated_at: "2026-05-11T14:30:00Z",
-        duration_days: 10,
-        variants: [
-          {
-            id: "control",
-            name: "Variant A (Hero only)",
-            type: "control",
-            weight: 50,
-            description: "CTA placed strictly in hero banner",
-            exposures: 2945,
-            conversions: 412,
-            conversion_rate: 14.0,
-          },
-          {
-            id: "treatment",
-            name: "Variant B (Sticky Navbar)",
-            type: "treatment",
-            weight: 50,
-            description: "CTA stays fixed in top right navigation on scroll",
-            exposures: 2945,
-            conversions: 498,
-            conversion_rate: 16.9,
-          },
-        ],
-        metrics: {
-          primary_metric: "trial_started",
-          secondary_metrics: ["scroll_depth"],
-          minimum_detectable_effect: 3.0,
-          statistical_power: 0.8,
-          confidence_level: 0.95,
-          p_value: 0.012,
-          relative_lift: 20.7,
-          is_significant: true,
-        },
-        ai_recommendation: "Early trend indicates positive lift (+20.7%), but sample size has reached 70% of target. Recommend running 3 more days for conclusive power.",
-      },
-      {
-        id: "exp_pricing_annual",
-        name: "Default Annual Billing Toggle with Savings Callout",
-        objective: "Increase average revenue per subscriber",
-        hypothesis: "Highlighting '2 Months Free' with preselected annual toggle lifts annual adoption",
-        repository_id: "repo_1",
-        repository_name: "Deepak-Kambala/RouteSmith",
-        branch: "main",
-        status: "paused",
-        feature_flag_key: "pricing_annual_default",
-        total_participants: 4970,
-        created_at: "2026-04-20T08:00:00Z",
-        updated_at: "2026-05-08T18:00:00Z",
-        duration_days: 21,
-        variants: [
-          {
-            id: "control",
-            name: "Variant A (Monthly Default)",
-            type: "control",
-            weight: 50,
-            description: "Standard monthly pricing selected by default",
-            exposures: 2485,
-            conversions: 186,
-            conversion_rate: 7.5,
-          },
-          {
-            id: "treatment",
-            name: "Variant B (Annual Default + Badge)",
-            type: "treatment",
-            weight: 50,
-            description: "Annual pricing preselected with subtle green 20% off pill",
-            exposures: 2485,
-            conversions: 218,
-            conversion_rate: 8.8,
-          },
-        ],
-        metrics: {
-          primary_metric: "annual_plan_purchased",
-          secondary_metrics: ["total_order_value"],
-          minimum_detectable_effect: 2.0,
-          statistical_power: 0.8,
-          confidence_level: 0.95,
-          p_value: 0.082,
-          relative_lift: 17.3,
-          is_significant: false,
-        },
-        ai_recommendation: "Inconclusive result (p = 0.082 > 0.05). Lift of +17.3% observed but insufficient sample size to guarantee confidence. Paused by administrator.",
-      },
-    ],
-  };
-}
-
-export async function fetchExperiments(): Promise<Experiment[]> {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/experiments`, { cache: "no-store" });
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn("Backend unavailable, using fallback experiments list:", err);
-  }
-  const dashboard = await fetchDashboardData();
-  return dashboard.recent_experiments;
-}
-
-export async function fetchExperimentById(id: string): Promise<Experiment | null> {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/experiments/${id}`, { cache: "no-store" });
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn(`Backend unavailable for experiment ${id}:`, err);
-  }
-  const experiments = await fetchExperiments();
-  return experiments.find((e) => e.id === id) || experiments[0] || null;
-}
-
-export async function fetchRepositories(): Promise<Repository[]> {
-  try {
-    const res = await fetch(`${BACKEND_URL}/api/repositories`, { cache: "no-store" });
-    if (res.ok) return await res.json();
-  } catch (err) {
-    console.warn("Backend unavailable, using repositories fallback:", err);
-  }
-  return [
+/**
+ * Honest empty state for User Experiment when no sessions have been recorded.
+ * Shows N=0 and zero fabricated participants/conversions.
+ */
+export const EMPTY_EXPERIMENT_STATE: UserExperimentState = {
+  evidence_type: "user_experiment",
+  hypothesis:
+    "Serving Hybrid RRF ranking increases the proportion of search sessions where developers find and copy code snippets compared to baseline BM25.",
+  primary_metric: "Snippet Copy Rate (Proxy for Usefulness)",
+  observation_rule:
+    "Exposure is recorded once per stable session ID upon first search. A conversion is recorded at most once per session when a snippet is copied.",
+  status: "NO_DATA",
+  status_message: "No experiment data yet. Execute searches or test a labeled scenario.",
+  total_sessions: 0,
+  total_conversions: 0,
+  winner_variant: null,
+  winner_lift: null,
+  winner_probability: null,
+  variants: [
     {
-      id: "repo_1",
-      name: "RouteSmith",
-      owner: "Deepak-Kambala",
-      default_branch: "main",
-      last_analyzed_commit: "11157e5",
-      experiment_count: 3,
-      connection_status: "connected",
-      component_count: 24,
-      route_count: 8,
-      detected_framework: "Next.js 16 (App Router) + FastAPI",
+      variant_id: "lexical_bm25",
+      name: "lexical_bm25 (Control)",
+      tag: "Control",
+      description: "BM25Okapi exact keyword and symbol matching",
+      color: "#D99B26",
+      exposures: 0,
+      conversions: 0,
+      conversion_rate: 0.0,
+      ci_lower: 2.5,
+      ci_upper: 97.5,
+      win_probability: 33.3,
+      relative_lift: "Baseline (Control)",
+      relative_lift_value: 0.0,
+      alpha: 1.0,
+      beta: 1.0,
     },
     {
-      id: "repo_2",
-      name: "acme-saas-frontend",
-      owner: "Deepak-Kambala",
-      default_branch: "production",
-      last_analyzed_commit: "8f42d10",
-      experiment_count: 1,
-      connection_status: "connected",
-      component_count: 42,
-      route_count: 14,
-      detected_framework: "React 19 + Vite",
+      variant_id: "semantic_dense",
+      name: "semantic_dense",
+      tag: "Variant B",
+      description: "32-component TruncatedSVD latent semantic cosine similarity",
+      color: "#38BDF8",
+      exposures: 0,
+      conversions: 0,
+      conversion_rate: 0.0,
+      ci_lower: 2.5,
+      ci_upper: 97.5,
+      win_probability: 33.3,
+      relative_lift: "No baseline data",
+      relative_lift_value: 0.0,
+      alpha: 1.0,
+      beta: 1.0,
     },
-  ];
-}
+    {
+      variant_id: "hybrid_rrf",
+      name: "hybrid_rrf",
+      tag: "Variant C",
+      description: "Reciprocal Rank Fusion balancing lexical precision and semantic recall",
+      color: "#37ECA5",
+      exposures: 0,
+      conversions: 0,
+      conversion_rate: 0.0,
+      ci_lower: 2.5,
+      ci_upper: 97.5,
+      win_probability: 33.4,
+      relative_lift: "No baseline data",
+      relative_lift_value: 0.0,
+      alpha: 1.0,
+      beta: 1.0,
+    },
+  ],
+  curves: {},
+  telemetry_recent: [],
+};
 
-export async function fetchIntegrations(): Promise<IntegrationStatus> {
+export async function fetchFlagsmithConfig(): Promise<FlagsmithConfig> {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/integrations`, { cache: "no-store" });
+    const res = await fetch(`${BACKEND_URL}/api/config`, { cache: "no-store" });
     if (res.ok) return await res.json();
   } catch (err) {
-    console.warn("Backend unavailable, using integrations fallback:", err);
+    console.warn("Backend unavailable for config, using empty state:", err);
   }
-  return {
-    github: {
-      connected: true,
-      username: "Deepak-Kambala",
-      repo_access_count: 4,
-    },
-    flagsmith: {
-      connected: true,
-      environment: "production",
-      mode: "deterministic_engine",
-      project_id: "routesmith-core",
-    },
-    gemini: {
-      configured: true,
-      model: "gemini-2.0-flash",
-    },
-  };
+  return EMPTY_FLAGSMITH_CONFIG;
 }
 
-export async function trackDemoEvent(
-  experimentId: string,
-  variantId: string,
-  eventType: "exposure" | "conversion",
-  participantId?: string
-): Promise<{ success: boolean; event: TelemetryEvent }> {
-  const pId = participantId || `usr_${Math.random().toString(36).substring(2, 8)}`;
+export async function fetchUserExperimentState(): Promise<UserExperimentState> {
   try {
-    const res = await fetch(`${BACKEND_URL}/api/events/track`, {
+    const res = await fetch(`${BACKEND_URL}/api/experiment/state`, { cache: "no-store" });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("Backend unavailable for experiment state, using empty state:", err);
+  }
+  return EMPTY_EXPERIMENT_STATE;
+}
+
+export async function fetchOfflineBenchmark(): Promise<OfflineBenchmarkState | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/benchmark/results`, { cache: "no-store" });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.warn("Backend unavailable for benchmark results:", err);
+  }
+  return null;
+}
+
+export async function executeSearch(params: {
+  query: string;
+  sessionId: string;
+  traits?: Record<string, any>;
+  simulateLatency?: boolean;
+}): Promise<SearchResponse | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/search`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        experiment_id: experimentId,
-        variant_id: variantId,
-        event_type: eventType,
-        participant_id: pId,
+        query: params.query,
+        session_id: params.sessionId,
+        user_id: params.sessionId,
+        traits: params.traits,
+        simulate_latency: params.simulateLatency,
       }),
     });
     if (res.ok) return await res.json();
   } catch (err) {
-    console.warn("Event tracking backend endpoint unavailable, generating local event:", err);
+    console.error("Search execution failed:", err);
   }
-
-  return {
-    success: true,
-    event: {
-      id: `evt_${Date.now()}`,
-      experiment_id: experimentId,
-      variant_id: variantId,
-      participant_id: pId,
-      event_type: eventType,
-      timestamp: new Date().toISOString(),
-    },
-  };
+  return null;
 }
 
+export async function recordSnippetConversion(params: {
+  sessionId: string;
+  docId: string;
+  rank: number;
+}): Promise<{
+  success: boolean;
+  duplicate: boolean;
+  message: string;
+  attributed_variant?: string;
+  state: UserExperimentState;
+} | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/conversion`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        session_id: params.sessionId,
+        doc_id: params.docId,
+        rank: params.rank,
+      }),
+    });
+    if (res.ok) return await res.json();
+  } catch (err) {
+    console.error("Conversion tracking failed:", err);
+  }
+  return null;
+}
+
+export async function injectLabeledScenario(
+  scenarioName: "inconclusive_low_sample" | "sdk_exact_bm25_wins" | "mixed_traffic_hybrid_wins" | "reset"
+): Promise<UserExperimentState | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/experiment/simulate`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ scenario: scenarioName }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.state;
+    }
+  } catch (err) {
+    console.error("Scenario injection failed:", err);
+  }
+  return null;
+}
+
+export async function updateFlagsmithKey(newKey: string): Promise<FlagsmithConfig | null> {
+  try {
+    const res = await fetch(`${BACKEND_URL}/api/config/key`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ environment_key: newKey.trim() }),
+    });
+    if (res.ok) {
+      const data = await res.json();
+      return data.status;
+    }
+  } catch (err) {
+    console.error("Failed to update Flagsmith key:", err);
+  }
+  return null;
+}

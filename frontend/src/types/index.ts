@@ -1,127 +1,163 @@
-export type ExperimentStatus = "draft" | "running" | "paused" | "concluded";
+/**
+ * SearchForge - Core TypeScript Definitions
+ * Track 01: Flagsmith Experimentation & Hybrid Search Workbench
+ */
 
-export interface Variant {
+export type SearchVariant = "lexical_bm25" | "semantic_dense" | "hybrid_rrf";
+
+export type AssignmentSource = "live_flagsmith_edge" | "local_simulation";
+
+export type ExperimentStatus =
+  | "COLLECTING_EVIDENCE"
+  | "INCONCLUSIVE"
+  | "STATISTICAL_WINNER_DETECTED"
+  | "NO_DATA";
+
+export interface RemoteConfigValues {
+  alpha: number;
+  rrf_k: number;
+  code_boost: number;
+  latency_sla_ms: number;
+}
+
+export interface FlagsmithConfig {
+  is_live: boolean;
+  mode: "live_edge_sdk" | "local_simulation" | "unconnected";
+  environment_key_masked: string;
+  api_url: string;
+  connection_message: string;
+  active_flags: {
+    flag_key: string;
+    default_variant: string;
+    alpha: number;
+    rrf_k: number;
+    code_boost: number;
+    latency_sla_ms: number;
+    kill_switch_active: boolean;
+  };
+}
+
+export interface FlagsmithEvaluation {
+  identifier: string;
+  traits: Record<string, any>;
+  variant: SearchVariant;
+  assignment_source: AssignmentSource;
+  evaluated_flag: string;
+  is_live_flagsmith: boolean;
+  flagsmith_edge_connected: boolean;
+  kill_switch_active: boolean;
+  segment_override: boolean;
+  segment_name: string | null;
+  remote_config: RemoteConfigValues;
+  warning: string | null;
+  experiment_type: string;
+}
+
+export interface SearchDocument {
   id: string;
+  title: string;
+  category: string;
+  snippet: string;
+  text: string;
+  tags: string[];
+  bm25_rank: number;
+  dense_rank: number;
+  final_rank: number;
+  score: number;
+  lexical_pct: number;
+  dense_pct: number;
+}
+
+export interface SearchResponse {
+  flagsmith: FlagsmithEvaluation;
+  search: {
+    query: string;
+    variant: SearchVariant;
+    has_code_tokens: boolean;
+    latency_ms: number;
+    results: SearchDocument[];
+  };
+  exposure: {
+    session_id: string;
+    assigned_variant: SearchVariant;
+    is_new_exposure: boolean;
+  };
+  latency_ms: number;
+}
+
+export interface VariantExperimentStats {
+  variant_id: SearchVariant;
   name: string;
-  type: "control" | "treatment";
-  weight: number; // e.g. 50
+  tag: string;
   description: string;
-  code_snippet?: string;
-  file_path?: string;
+  color: string;
   exposures: number;
   conversions: number;
   conversion_rate: number;
+  ci_lower: number;
+  ci_upper: number;
+  win_probability: number;
+  relative_lift: string;
+  relative_lift_value: number;
+  alpha: number;
+  beta: number;
 }
 
-export interface ExperimentMetric {
-  primary_metric: string;
-  secondary_metrics: string[];
-  minimum_detectable_effect: number;
-  statistical_power: number;
-  confidence_level: number;
-  p_value?: number;
-  relative_lift?: number;
-  is_significant?: boolean;
-}
-
-export interface Experiment {
-  id: string;
-  name: string;
-  objective: string;
-  hypothesis: string;
-  repository_id: string;
-  repository_name: string;
-  branch: string;
-  status: ExperimentStatus;
-  feature_flag_key: string;
-  variants: Variant[];
-  metrics: ExperimentMetric;
-  total_participants: number;
-  created_at: string;
-  updated_at: string;
-  duration_days: number;
-  target_audience?: string;
-  potential_risks?: string[];
-  ai_recommendation?: string;
-}
-
-export interface Repository {
-  id: string;
-  name: string;
-  owner: string;
-  default_branch: string;
-  last_analyzed_commit: string;
-  experiment_count: number;
-  connection_status: "connected" | "syncing" | "error";
-  component_count: number;
-  route_count: number;
-  detected_framework: string;
-}
-
-export type ToolStatus = "waiting" | "running" | "completed" | "failed" | "requires_approval";
-
-export interface ToolRun {
-  id: string;
-  tool_name: string;
-  status: ToolStatus;
-  input_params: Record<string, any>;
-  output_summary?: string;
-  error_message?: string;
-  started_at: string;
-  completed_at?: string;
-}
-
-export interface AgentMessage {
-  id: string;
-  sender: "user" | "agent" | "system";
-  content: string;
-  timestamp: string;
-  reasoning_summary?: string;
-  tool_runs?: ToolRun[];
-  proposed_patch?: {
-    file_path: string;
-    original_code: string;
-    modified_code: string;
-    diff: string;
-  };
-  proposed_experiment?: Partial<Experiment>;
-  requires_approval?: boolean;
-  approval_status?: "pending" | "approved" | "rejected";
-}
-
-export interface AgentSession {
-  id: string;
-  title: string;
-  created_at: string;
-  repository_id: string;
-  messages: AgentMessage[];
+export interface CurvePoint {
+  x: number;
+  y: number;
 }
 
 export interface TelemetryEvent {
   id: string;
-  experiment_id: string;
-  participant_id: string;
-  variant_id: string;
-  event_type: "exposure" | "conversion";
   timestamp: string;
-  metadata?: Record<string, any>;
+  session_id: string;
+  variant: SearchVariant;
+  assignment_source: AssignmentSource;
+  event: string;
+  details: string;
+  status: "EXPOSURE" | "CONVERSION";
 }
 
-export interface IntegrationStatus {
-  github: {
-    connected: boolean;
-    username?: string;
-    repo_access_count?: number;
-  };
-  flagsmith: {
-    connected: boolean;
-    environment?: string;
-    mode: "cloud_sdk" | "deterministic_engine";
-    project_id?: string;
-  };
-  gemini: {
-    configured: boolean;
-    model: string;
-  };
+export interface UserExperimentState {
+  evidence_type: "user_experiment";
+  hypothesis: string;
+  primary_metric: string;
+  observation_rule: string;
+  status: ExperimentStatus;
+  status_message: string;
+  total_sessions: number;
+  total_conversions: number;
+  winner_variant: SearchVariant | null;
+  winner_lift: string | null;
+  winner_probability: number | null;
+  variants: VariantExperimentStats[];
+  curves: Record<string, CurvePoint[]>;
+  telemetry_recent: TelemetryEvent[];
 }
 
+export interface CategoryBreakdown {
+  total: number;
+  hits_at_3: number;
+  recall_at_3: number;
+}
+
+export interface OfflineBenchmarkVariantResult {
+  variant_id: SearchVariant;
+  name: string;
+  color: string;
+  queries_evaluated: number;
+  recall_at_3: number;
+  precision_at_1: number;
+  mrr_at_3: number;
+  avg_latency_ms: number;
+  category_breakdown: Record<string, CategoryBreakdown>;
+}
+
+export interface OfflineBenchmarkState {
+  evidence_type: "offline_retrieval_benchmark";
+  dataset_description: string;
+  relevance_assumptions: string;
+  total_queries: number;
+  results: Record<string, OfflineBenchmarkVariantResult>;
+}
